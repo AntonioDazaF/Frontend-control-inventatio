@@ -1,0 +1,70 @@
+<div class="login-container">
+  <mat-card class="login-card">
+    <div class="login-header">
+      <div class="logo-container">
+        <img src="assets/logo.png" alt="Control de Inventario">
+      </div>
+      <h1>Control de Inventario</h1>
+      <p>Inicia sesión para continuar</p>
+    </div>
+
+    <!-- FORMULARIO DE LOGIN -->
+    <form [formGroup]="loginForm" *ngIf="!isRegisterMode">
+      <mat-form-field class="full-width" appearance="outline">
+        <mat-label>Nombre de usuario</mat-label>
+        <input matInput formControlName="nombreUsuario" placeholder="Ingrese su usuario">
+      </mat-form-field>
+
+      <mat-form-field class="full-width" appearance="outline">
+        <mat-label>Contraseña</mat-label>
+        <input matInput type="password" formControlName="password" placeholder="Ingrese su contraseña">
+      </mat-form-field>
+
+      <button mat-raised-button color="primary" class="full-width" (click)="onSubmit()" [disabled]="loading">
+        <ng-container *ngIf="!loading; else spinner">Iniciar sesión</ng-container>
+        <ng-template #spinner>
+          <mat-progress-spinner diameter="24" mode="indeterminate"></mat-progress-spinner>
+        </ng-template>
+      </button>
+
+      <button mat-stroked-button color="primary" class="toggle-btn full-width" type="button" (click)="toggleMode()">
+        ¿No tienes cuenta? Regístrate
+      </button>
+    </form>
+
+    <!-- FORMULARIO DE REGISTRO -->
+    <form [formGroup]="registerForm" *ngIf="isRegisterMode">
+      <mat-form-field class="full-width" appearance="outline">
+        <mat-label>Nombre de usuario</mat-label>
+        <input matInput formControlName="nombreUsuario" placeholder="Ingrese su nombre de usuario">
+      </mat-form-field>
+
+      <mat-form-field class="full-width" appearance="outline">
+        <mat-label>Contraseña</mat-label>
+        <input matInput type="password" formControlName="password" placeholder="Ingrese su contraseña">
+      </mat-form-field>
+
+      <mat-form-field class="full-width" appearance="outline">
+        <mat-label>Rol</mat-label>
+        <mat-select formControlName="roles">
+          <mat-option value="ADMIN">ADMIN</mat-option>
+          <mat-option value="SUPERVISOR">SUPERVISOR</mat-option>
+          <mat-option value="OPERADOR">OPERADOR</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <button mat-raised-button color="primary" class="full-width" (click)="onSubmit()" [disabled]="loading">
+        <ng-container *ngIf="!loading; else spinner">Registrar</ng-container>
+        <ng-template #spinner>
+          <mat-progress-spinner diameter="24" mode="indeterminate"></mat-progress-spinner>
+        </ng-template>
+      </button>
+
+      <button mat-stroked-button color="primary" class="toggle-btn full-width" type="button" (click)="toggleMode()">
+        ¿Ya tienes cuenta? Inicia sesión
+      </button>
+    </form>
+
+    <p class="roles-text">Roles disponibles: ADMIN | SUPERVISOR | OPERADOR</p>
+  </mat-card>
+</div>
