@@ -39,7 +39,7 @@ export class ReportsListComponent implements OnInit {
   descargarInventarioExcel(): void {
     this.errorMsg = '';
     this.cargando = true;
-    this.api.descargarArchivo('/reportes/inventario/excel', 'reporte_inventario.xlsx');
+    this.api.descargarArchivo('/reportes/inventario/excel', 'reporte_inventario.xlsx', 'excel');
     this.cargando = false;
   }
 }
