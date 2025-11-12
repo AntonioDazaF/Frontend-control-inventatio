@@ -20,6 +20,8 @@ describe('App', () => {
     const fixture = TestBed.createComponent(App);
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, inventory-frontend');
+    const heading = compiled.querySelector('h1');
+    const text = heading ? heading.textContent : '';
+    expect(text).toContain('Hello, inventory-frontend');
   });
 });

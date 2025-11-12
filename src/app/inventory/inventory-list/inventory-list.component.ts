@@ -29,13 +29,13 @@ import { ApiService } from '../../core/services/api.service';
 })
 export class InventoryListComponent implements OnInit {
   displayedColumns: string[] = [
-    'id',
+    'sku',
     'nombre',
     'categoria',
     'stock',
+    'minimo',
     'stockMaximo',
     'estado',
-    'precio',
     'acciones'
   ];
 
@@ -55,13 +55,13 @@ export class InventoryListComponent implements OnInit {
   loadProductos(page: number = this.currentPage, size: number = this.pageSize): void {
     this.api.getProductosPage(page, size).subscribe({
       next: (data) => {
-        const productos = Array.isArray(data) ? data : data?.content ?? [];
+        const productos = Array.isArray(data) ? data : (data && data.content) || [];
         this.productosPagina = productos.map((producto: any) => ({ ...producto }));
 
         if (!Array.isArray(data)) {
-          this.totalItems = data?.totalElements ?? productos.length;
-          this.currentPage = data?.number ?? page;
-          this.pageSize = data?.size ?? size;
+          this.totalItems = typeof data.totalElements === 'number' ? data.totalElements : productos.length;
+          this.currentPage = typeof data.number === 'number' ? data.number : page;
+          this.pageSize = typeof data.size === 'number' ? data.size : size;
         } else {
           this.totalItems = productos.length;
           this.currentPage = page;
@@ -84,7 +84,13 @@ export class InventoryListComponent implements OnInit {
     const term = this.searchTerm.trim().toLowerCase();
     this.productos = term
       ? this.productosPagina.filter((producto) =>
-          [producto?.nombre, producto?.categoria]
+          [
+            producto && producto.nombre,
+            producto && producto.categoria,
+            producto && producto.sku,
+            producto && producto.codigo,
+            producto && producto.id
+          ]
             .filter((value): value is string => typeof value === 'string')
             .some((value) => value.toLowerCase().includes(term))
         )
@@ -112,9 +118,9 @@ export class InventoryListComponent implements OnInit {
   }
 
   getEstadoClass(p: any): string {
-    if (p.stock === 0) return 'estado-rojo';
-    if (p.stock < p.minimo) return 'estado-naranja';
-    if (p.stock >= p.minimo && p.stock < p.stockMaximo) return 'estado-verde';
-    return 'estado-azul';
+    if (p.stock === 0) return 'danger';
+    if (p.stock < p.minimo) return 'warning';
+    if (p.stock >= p.minimo && p.stock < p.stockMaximo) return 'success';
+    return 'info';
   }
 }
