@@ -1,21 +1,90 @@
-<mat-card class="report-card">
-  <h2>Reportes del Sistema</h2>
-
-  <div class="chart-container">
-    <canvas id="movimientosChart"></canvas>
+<section class="reports-page">
+  <div class="page-header">
+    <div class="page-title">
+      <span class="pill">Inteligencia operacional</span>
+      <h1>Reportes de Inventario</h1>
+      <p>Analiza el comportamiento del inventario y exporta la información que tu equipo necesita.</p>
+    </div>
+    <div class="actions">
+      <button mat-stroked-button (click)="descargarInventarioExcel()">
+        <mat-icon>grid_on</mat-icon>
+        Exportar Excel
+      </button>
+      <button mat-stroked-button color="primary" (click)="descargarInventarioPDF()">
+        <mat-icon>picture_as_pdf</mat-icon>
+        Exportar PDF
+      </button>
+      <button mat-raised-button color="primary" (click)="descargarMovimientosPDF()">
+        <mat-icon>print</mat-icon>
+        Imprimir
+      </button>
+    </div>
   </div>
 
-  <div class="buttons">
-    <button mat-raised-button color="primary" (click)="descargarInventarioPDF()">
-      <mat-icon>picture_as_pdf</mat-icon> Inventario PDF
-    </button>
+  <div class="summary-grid">
+    <mat-card class="summary-card">
+      <span class="label">Total Productos</span>
+      <strong class="value">{{ resumen.totalProductos }}</strong>
+      <span class="caption">Activos en inventario</span>
+    </mat-card>
 
-    <button mat-raised-button color="accent" (click)="descargarMovimientosPDF()">
-      <mat-icon>assessment</mat-icon> Movimientos PDF
-    </button>
+    <mat-card class="summary-card">
+      <span class="label">Valor Total</span>
+      <strong class="value">{{ resumen.valorTotal | currency: 'COP':'symbol-narrow':'1.0-0':'es-CO' }}</strong>
+      <span class="caption">Estimado</span>
+    </mat-card>
 
-    <button mat-raised-button color="warn" (click)="descargarInventarioExcel()">
-      <mat-icon>table_chart</mat-icon> Inventario Excel
-    </button>
+    <mat-card class="summary-card">
+      <span class="label">Productos Bajos</span>
+      <strong class="value">{{ resumen.stockBajo }}</strong>
+      <span class="caption">Necesitan reposición</span>
+    </mat-card>
+
+    <mat-card class="summary-card">
+      <span class="label">Categorías</span>
+      <strong class="value">{{ resumen.categorias }}</strong>
+      <span class="caption">Activas</span>
+    </mat-card>
   </div>
-</mat-card>
+
+  <div class="chart-grid">
+    <mat-card class="chart-card span-2">
+      <div class="card-header">
+        <div>
+          <h3>Gráfico de Tendencias</h3>
+          <p>Comportamiento de entradas y salidas</p>
+        </div>
+        <span class="chip">Últimos 8 registros</span>
+      </div>
+      <div class="chart-wrapper">
+        <canvas id="tendenciasChart"></canvas>
+      </div>
+    </mat-card>
+  </div>
+
+  <div class="chart-grid secondary">
+    <mat-card class="chart-card">
+      <div class="card-header">
+        <div>
+          <h3>Estadísticas de Consumo</h3>
+          <p>Productos con mayor rotación</p>
+        </div>
+      </div>
+      <div class="chart-wrapper">
+        <canvas id="consumoChart"></canvas>
+      </div>
+    </mat-card>
+
+    <mat-card class="chart-card">
+      <div class="card-header">
+        <div>
+          <h3>Recepción de Productos</h3>
+          <p>Unidades recibidas por periodo</p>
+        </div>
+      </div>
+      <div class="chart-wrapper">
+        <canvas id="recepcionChart"></canvas>
+      </div>
+    </mat-card>
+  </div>
+</section>

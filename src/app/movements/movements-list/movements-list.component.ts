@@ -29,7 +29,7 @@ import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
   styleUrls: ['./movement-list.component.css']
 })
 export class MovementListComponent implements OnInit {
-  displayedColumns: string[] = ['id', 'producto', 'tipo', 'cantidad', 'fecha', 'usuario'];
+  displayedColumns: string[] = ['fecha', 'tipo', 'producto', 'cantidad', 'usuario'];
   movimientos: any[] = [];
   private movimientosPagina: any[] = [];
   searchTerm = '';
@@ -38,6 +38,7 @@ export class MovementListComponent implements OnInit {
   pageSize = 10;
   pageIndex = 0;
   readonly pageSizeOptions = [10, 25, 50, 100];
+  tipoFiltro: 'todos' | 'entrada' | 'salida' = 'todos';
 
   constructor(
     private api: ApiService,
@@ -54,13 +55,13 @@ export class MovementListComponent implements OnInit {
   loadMovimientos(page: number = this.pageIndex, size: number = this.pageSize): void {
     this.api.getMovimientosPage(page, size).subscribe({
       next: (data) => {
-        const movimientos = Array.isArray(data) ? data : data.content || [];
+        const movimientos = Array.isArray(data) ? data : (data && data.content) || [];
         this.movimientosPagina = movimientos.map((m: any) => ({ ...m }));
 
         if (!Array.isArray(data)) {
-          this.totalMovimientos = data.totalElements ?? movimientos.length;
-          this.pageIndex = data.number ?? page;
-          this.pageSize = data.size ?? size;
+          this.totalMovimientos = typeof data.totalElements === 'number' ? data.totalElements : movimientos.length;
+          this.pageIndex = typeof data.number === 'number' ? data.number : page;
+          this.pageSize = typeof data.size === 'number' ? data.size : size;
         } else {
           this.totalMovimientos = movimientos.length;
           this.pageIndex = page;
@@ -95,9 +96,24 @@ export class MovementListComponent implements OnInit {
 
   private aplicarFiltro(): void {
     const term = this.searchTerm.trim().toLowerCase();
-    this.movimientos = term
-      ? this.movimientosPagina.filter((m) => m.producto?.nombre?.toLowerCase().includes(term))
-      : [...this.movimientosPagina];
+    this.movimientos = this.movimientosPagina.filter((m) => {
+      const nombre =
+        (
+          (m.producto && m.producto.nombre) ||
+          m.productoNombre ||
+          ''
+        ).toLowerCase();
+      const coincideBusqueda = term ? nombre.includes(term) : true;
+      const tipo = (m.tipo || '').toUpperCase();
+      const coincideTipo =
+        this.tipoFiltro === 'todos'
+          ? true
+          : this.tipoFiltro === 'entrada'
+            ? tipo === 'ENTRADA'
+            : tipo === 'SALIDA';
+
+      return coincideBusqueda && coincideTipo;
+    });
   }
 
   cambiarPagina(evento: PageEvent): void {
@@ -108,5 +124,10 @@ export class MovementListComponent implements OnInit {
 
   nuevoMovimiento(): void {
     this.router.navigate(['/movements/new']);
+  }
+
+  cambiarFiltro(tipo: 'todos' | 'entrada' | 'salida'): void {
+    this.tipoFiltro = tipo;
+    this.aplicarFiltro();
   }
 }

@@ -43,7 +43,11 @@ export class WebSocketService {
 
   /** 🔹 Escuchar productos */
   private subscribeToProductTopic(): void {
-    this.stompClient?.subscribe('/topic/productos', (message: IMessage) => {
+    if (!this.stompClient) {
+      return;
+    }
+
+    this.stompClient.subscribe('/topic/productos', (message: IMessage) => {
       if (message.body) {
         const data = JSON.parse(message.body);
         this.productUpdatesSubject.next(data);
@@ -53,7 +57,11 @@ export class WebSocketService {
 
   /** 🔹 Escuchar alertas */
   private subscribeToAlertsTopic(): void {
-    this.stompClient?.subscribe('/topic/alertas', (message: IMessage) => {
+    if (!this.stompClient) {
+      return;
+    }
+
+    this.stompClient.subscribe('/topic/alertas', (message: IMessage) => {
       if (message.body) {
         const data = JSON.parse(message.body);
         this.alertsSubject.next(data);
