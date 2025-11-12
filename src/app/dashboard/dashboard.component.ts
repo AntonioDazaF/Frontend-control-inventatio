@@ -84,104 +84,39 @@ export class DashboardComponent implements OnInit {
   constructor(private api: ApiService) {}
 
   ngOnInit(): void {
-    forkJoin({
-      resumen: this.api.get<DashboardResumen>('dashboard/resumen').pipe(
-        catchError((error) => {
-          console.error('Error cargando resumen', error);
-          return of<Partial<DashboardResumen>>({});
-        })
-      ),
-      movimientos: this.api.getMovimientosPage(0, 1).pipe(
-        catchError((error) => {
-          console.error('Error cargando movimientos', error);
-          return of([]);
-        })
-      ),
-      productos: this.api.getProductos().pipe(
-        catchError((error) => {
-          console.error('Error cargando productos', error);
-          return of([]);
-        })
-      ),
-    })
-      .pipe(
-        map(({ resumen, movimientos, productos }) => {
-          const movimientosData = Array.isArray(movimientos)
-            ? movimientos
-            : movimientos?.content ?? [];
-          const totalMovimientos = Array.isArray(movimientos)
-            ? movimientos.length
-            : movimientos?.totalElements ?? movimientosData.length ?? 0;
+    this.api.get<DashboardResumen>('dashboard/resumen').subscribe({
+      next: (data: DashboardResumen) => {
+        this.resumen = data;
 
-          const productosData = Array.isArray(productos)
-            ? productos
-            : productos?.content ?? [];
-
-          const distribution = productosData.reduce(
-            (acc: InventoryDistribution, producto: any) => {
-              const stock = Number(producto?.stock ?? 0);
-              const minimo = Number(producto?.minimo ?? 0);
-
-              if (stock <= 0) {
-                acc.agotados += 1;
-              } else if (stock <= minimo) {
-                acc.stockBajo += 1;
-              } else {
-                acc.disponibles += 1;
-              }
-
-              return acc;
-            },
-            { disponibles: 0, stockBajo: 0, agotados: 0 } as InventoryDistribution
-          );
-
-          const totalProductos =
-            resumen?.totalProductos ?? productosData.length ?? 0;
-
-          return {
-            resumen: {
-              ...resumen,
-              totalProductos,
-              movimientos: totalMovimientos,
-              productosDisponibles:
-                resumen?.productosDisponibles ?? distribution.disponibles,
-              stockBajo: resumen?.stockBajo ?? distribution.stockBajo,
-              productosAgotados:
-                resumen?.productosAgotados ?? distribution.agotados,
-            },
-            chartData: {
-              labels: this.chartData.labels,
-              datasets: [
-                {
-                  ...this.chartData.datasets[0],
-                  data: [
-                    totalProductos,
-                    totalMovimientos,
-                    resumen?.alertasActivas ?? 0,
-                  ],
-                },
+        this.chartData = {
+          ...this.chartData,
+          datasets: [
+            {
+              ...this.chartData.datasets[0],
+              data: [
+                data.totalProductos ?? 0,
+                data.movimientos ?? 0,
+                data.alertasActivas ?? 0,
               ],
             },
-            pieData: {
-              labels: this.pieData.labels,
-              datasets: [
-                {
-                  ...this.pieData.datasets[0],
-                  data: [
-                    distribution.disponibles,
-                    distribution.stockBajo,
-                    distribution.agotados,
-                  ],
-                },
+          ],
+        };
+
+        this.pieData = {
+          ...this.pieData,
+          datasets: [
+            {
+              ...this.pieData.datasets[0],
+              data: [
+                data.productosDisponibles ?? 0,
+                data.stockBajo ?? 0,
+                data.productosAgotados ?? 0,
               ],
             },
-          };
-        })
-      )
-      .subscribe(({ resumen, chartData, pieData }) => {
-        this.resumen = resumen;
-        this.chartData = chartData;
-        this.pieData = pieData;
-      });
+          ],
+        };
+      },
+      error: (err: unknown) => console.error('Error cargando resumen', err),
+    });
   }
 }
