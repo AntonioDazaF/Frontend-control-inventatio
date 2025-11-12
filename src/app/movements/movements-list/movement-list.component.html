@@ -75,6 +75,15 @@
   <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
 </table>
 
+<mat-paginator
+  [length]="totalMovimientos"
+  [pageSize]="pageSize"
+  [pageIndex]="pageIndex"
+  [pageSizeOptions]="pageSizeOptions"
+  (page)="cambiarPagina($event)"
+  showFirstLastButtons>
+</mat-paginator>
+
 <!-- Mensaje cuando no hay datos -->
 <div *ngIf="movimientos.length === 0" class="loading">
   No hay movimientos registrados.

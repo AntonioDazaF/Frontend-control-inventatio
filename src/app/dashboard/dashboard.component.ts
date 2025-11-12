@@ -80,17 +80,33 @@ export class DashboardComponent implements OnInit {
       next: (data: DashboardResumen) => {
         this.resumen = data;
 
-        this.chartData.datasets[0].data = [
-          data.totalProductos ?? 0,
-          data.movimientos ?? 0,
-          data.alertasActivas ?? 0,
-        ];
+        this.chartData = {
+          ...this.chartData,
+          datasets: [
+            {
+              ...this.chartData.datasets[0],
+              data: [
+                data.totalProductos ?? 0,
+                data.movimientos ?? 0,
+                data.alertasActivas ?? 0,
+              ],
+            },
+          ],
+        };
 
-        this.pieData.datasets[0].data = [
-          data.productosDisponibles ?? 0,
-          data.stockBajo ?? 0,
-          data.productosAgotados ?? 0,
-        ];
+        this.pieData = {
+          ...this.pieData,
+          datasets: [
+            {
+              ...this.pieData.datasets[0],
+              data: [
+                data.productosDisponibles ?? 0,
+                data.stockBajo ?? 0,
+                data.productosAgotados ?? 0,
+              ],
+            },
+          ],
+        };
       },
       error: (err: unknown) => console.error('Error cargando resumen', err),
     });

@@ -1,13 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 
-import { Websocket } from './websocket';
+import { WebSocketService } from './websocket.service';
 
-describe('Websocket', () => {
-  let service: Websocket;
+describe('WebSocketService', () => {
+  let service: WebSocketService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(Websocket);
+    service = TestBed.inject(WebSocketService);
   });
 
   it('should be created', () => {
