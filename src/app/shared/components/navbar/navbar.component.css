@@ -1,16 +1,129 @@
 .navbar {
+  background: #fff;
+  color: #1a1f36;
+  border-bottom: 1px solid rgba(15, 74, 184, 0.1);
+  box-shadow: 0 12px 32px rgba(15, 74, 184, 0.1);
   display: flex;
+  align-items: center;
   justify-content: space-between;
+  padding: 0 24px;
+  gap: 24px;
+}
+
+.navbar-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.menu-button {
+  background: rgba(25, 118, 210, 0.1);
+  border-radius: 12px;
+}
+
+.navbar-title {
+  display: flex;
+  flex-direction: column;
 }
 
 .title {
-  font-weight: 600;
+  font-weight: 700;
   font-size: 18px;
 }
 
-.spacer {
-  flex: 1;
+.subtitle {
+  font-size: 12px;
+  color: #64748b;
 }
-button {
-  margin-left: 10px;
+
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.user-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  background: #f8fafc;
+  border-radius: 999px;
+  padding: 6px 12px 6px 6px;
+  box-shadow: inset 0 0 0 1px rgba(100, 116, 139, 0.15);
+}
+
+.user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.user-avatar.role-admin {
+  background: linear-gradient(135deg, #0f4ab8, #42a5f5);
+}
+
+.user-avatar.role-supervisor {
+  background: linear-gradient(135deg, #0d9488, #34d399);
+}
+
+.user-avatar.role-operator {
+  background: linear-gradient(135deg, #b45309, #fbbf24);
+}
+
+.user-avatar.role-default {
+  background: linear-gradient(135deg, #475569, #94a3b8);
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.user-name {
+  font-weight: 600;
+}
+
+.user-role {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.user-chip button {
+  margin-left: 4px;
+}
+
+@media (max-width: 960px) {
+  .navbar {
+    flex-wrap: wrap;
+    padding: 12px 16px;
+    gap: 16px;
+  }
+
+  .navbar-right {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 600px) {
+  .navbar {
+    gap: 12px;
+  }
+
+  .navbar-right {
+    justify-content: center;
+  }
+
+  .user-chip {
+    width: 100%;
+    justify-content: space-between;
+  }
 }

@@ -40,6 +40,7 @@ export class InventoryListComponent implements OnInit {
   ];
 
   productos: any[] = [];
+  private productosPagina: any[] = [];
   totalItems = 0;
   pageSize = 5;
   currentPage = 0;
@@ -51,11 +52,23 @@ export class InventoryListComponent implements OnInit {
     this.loadProductos();
   }
 
-  loadProductos(): void {
-    this.api.getProductos().subscribe({
+  loadProductos(page: number = this.currentPage, size: number = this.pageSize): void {
+    this.api.getProductosPage(page, size).subscribe({
       next: (data) => {
-        this.productos = Array.isArray(data) ? data : data.content || [];
-        this.totalItems = data.totalElements || this.productos.length;
+        const productos = Array.isArray(data) ? data : data?.content ?? [];
+        this.productosPagina = productos.map((producto: any) => ({ ...producto }));
+
+        if (!Array.isArray(data)) {
+          this.totalItems = data?.totalElements ?? productos.length;
+          this.currentPage = data?.number ?? page;
+          this.pageSize = data?.size ?? size;
+        } else {
+          this.totalItems = productos.length;
+          this.currentPage = page;
+          this.pageSize = size;
+        }
+
+        this.applySearch();
       },
       error: (err) => console.error('Error cargando productos:', err)
     });
@@ -64,7 +77,18 @@ export class InventoryListComponent implements OnInit {
   onPageChange(event: PageEvent): void {
     this.pageSize = event.pageSize;
     this.currentPage = event.pageIndex;
-    this.loadProductos();
+    this.loadProductos(event.pageIndex, event.pageSize);
+  }
+
+  applySearch(): void {
+    const term = this.searchTerm.trim().toLowerCase();
+    this.productos = term
+      ? this.productosPagina.filter((producto) =>
+          [producto?.nombre, producto?.categoria]
+            .filter((value): value is string => typeof value === 'string')
+            .some((value) => value.toLowerCase().includes(term))
+        )
+      : [...this.productosPagina];
   }
 
   editar(id: string): void {
