@@ -33,8 +33,17 @@
 }
 
 .summary-card mat-icon {
-  font-size: 40px;
-  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  margin-bottom: 15px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.25);
+  font-size: 36px;
+  line-height: 1;
+  color: inherit;
 }
 
 .summary-card h3 {
