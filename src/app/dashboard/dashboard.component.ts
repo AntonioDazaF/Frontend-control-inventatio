@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
-import { MatIconModule } from '@angular/material/icon'; 
+import { MatIconModule } from '@angular/material/icon';
 
 import {
   BaseChartDirective,
@@ -9,6 +9,8 @@ import {
   withDefaultRegisterables
 } from 'ng2-charts';
 import { ChartData, ChartOptions } from 'chart.js';
+import { forkJoin, of } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 
 import { ApiService } from '../../app/core/services/api.service';
 
@@ -23,6 +25,12 @@ interface DashboardResumen {
   stockBajo: number;
   productosAgotados: number;
 }
+
+type InventoryDistribution = {
+  disponibles: number;
+  stockBajo: number;
+  agotados: number;
+};
 
 @Component({
   selector: 'app-dashboard',
