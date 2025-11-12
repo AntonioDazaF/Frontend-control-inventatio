@@ -22,7 +22,10 @@ export class ApiService {
 
   getProductosPage(page: number = 0, size: number = 10): Observable<any> {
     return this.http.get(`${this.baseUrl}/productos/page`, {
-      params: { page, size }
+      params: {
+        page: page.toString(),
+        size: size.toString()
+      }
     });
   }
 
