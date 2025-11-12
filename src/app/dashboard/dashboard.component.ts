@@ -9,8 +9,8 @@ import {
   withDefaultRegisterables
 } from 'ng2-charts';
 import { ChartData, ChartOptions } from 'chart.js';
-import { forkJoin, of } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { forkJoin, Observable, of } from 'rxjs';
+import { catchError, map, switchMap } from 'rxjs/operators';
 
 import { ApiService } from '../../app/core/services/api.service';
 
@@ -20,6 +20,7 @@ type PieChartData = ChartData<'pie'>;
 interface DashboardResumen {
   totalProductos: number;
   movimientos: number;
+  movimientosHoy: number;
   alertasActivas: number;
   productosDisponibles: number;
   stockBajo: number;
@@ -50,9 +51,10 @@ type InventoryDistribution = {
 })
 export class DashboardComponent implements OnInit {
   resumen: Partial<DashboardResumen> = {};
+  private readonly movimientosPageSize = 100;
 
   chartData: BarChartData = {
-    labels: ['Productos', 'Movimientos', 'Alertas'],
+    labels: ['Productos', 'Movimientos Hoy', 'Alertas'],
     datasets: [
       {
         label: 'Totales',
