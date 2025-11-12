@@ -17,6 +17,8 @@ describe('MovementListComponent', () => {
   beforeEach(async () => {
     apiService = jasmine.createSpyObj<ApiService>('ApiService', ['getMovimientosPage', 'getProductos']);
     apiService.getMovimientosPage.and.returnValue(of({ content: [], totalElements: 0, number: 0, size: 10 }));
+    apiService = jasmine.createSpyObj<ApiService>('ApiService', ['getMovimientos', 'getProductos']);
+    apiService.getMovimientos.and.returnValue(of([]));
     apiService.getProductos.and.returnValue(of([]));
 
     authService = jasmine.createSpyObj<AuthService>('AuthService', ['getUserFromToken']);
