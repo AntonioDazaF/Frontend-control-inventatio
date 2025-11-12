@@ -18,7 +18,7 @@
     <mat-card class="summary-card green">
       <mat-icon>trending_up</mat-icon>
       <h3>Movimientos Hoy</h3>
-      <p>{{ resumen.movimientos || 0 }}</p>
+      <p>{{ resumen.movimientosHoy ?? resumen.movimientos ?? 0 }}</p>
     </mat-card>
 
     <mat-card class="summary-card red">

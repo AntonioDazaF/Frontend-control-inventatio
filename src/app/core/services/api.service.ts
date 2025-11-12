@@ -101,27 +101,44 @@ export class ApiService {
     return this.http.get(`${this.baseUrl}${endpoint}`, { headers, responseType: 'blob' });
   }
 
-descargarArchivo(endpoint: string, nombreArchivo: string): void {
-  const headers = {
-    Authorization: `Bearer ${localStorage.getItem('token')}`,
-    Accept: 'application/pdf'
-  };
+  descargarArchivo(endpoint: string, nombreArchivo: string, tipo: 'pdf' | 'excel' = 'pdf'): void {
+    const token = localStorage.getItem('token');
+    const headers: Record<string, string> = {
+      Accept: tipo === 'excel'
+        ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        : 'application/pdf'
+    };
 
-  this.http.get(`${this.baseUrl}${endpoint}`, { headers, responseType: 'blob' })
-    .subscribe({
-      next: (blob) => {
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = nombreArchivo;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        window.URL.revokeObjectURL(url);
-      },
-      error: (err) => console.error('Error descargando archivo:', err)
-    });
-}
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const url = this.resolverUrl(endpoint);
+
+    this.http.get(url, { headers, responseType: 'blob' })
+      .subscribe({
+        next: (blob) => {
+          const link = document.createElement('a');
+          const objectUrl = window.URL.createObjectURL(blob);
+          link.href = objectUrl;
+          link.download = nombreArchivo;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(objectUrl);
+        },
+        error: (err) => console.error('Error descargando archivo:', err)
+      });
+  }
+
+  private resolverUrl(endpoint: string): string {
+    if (/^https?:\/\//i.test(endpoint)) {
+      return endpoint;
+    }
+
+    const normalizado = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+    return `${this.baseUrl}${normalizado}`;
+  }
 
   // ----------------------------
   // 🔹 Dashboard
