@@ -22,7 +22,10 @@ export class ApiService {
 
   getProductosPage(page: number = 0, size: number = 10): Observable<any> {
     return this.http.get(`${this.baseUrl}/productos/page`, {
-      params: { page, size }
+      params: {
+        page: page.toString(),
+        size: size.toString()
+      }
     });
   }
 
@@ -51,8 +54,24 @@ export class ApiService {
   // ----------------------------
   // 🔹 Movimientos
   // ----------------------------
-  getMovimientos(): Observable<any> {
-    return this.http.get(`${this.baseUrl}/movimientos`);
+  getMovimientos(page?: number, size?: number): Observable<any> {
+    const params: Record<string, string> = {};
+
+    if (page !== undefined) {
+      params['page'] = page.toString();
+    }
+
+    if (size !== undefined) {
+      params['size'] = size.toString();
+    }
+
+    return this.http.get(`${this.baseUrl}/movimientos`, {
+      params: Object.keys(params).length ? params : undefined
+    });
+  }
+
+  getMovimientosPage(page: number = 0, size: number = 10): Observable<any> {
+    return this.getMovimientos(page, size);
   }
 
   createMovimiento(dto: any): Observable<any> {
