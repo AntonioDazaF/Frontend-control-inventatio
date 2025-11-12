@@ -1,18 +1,48 @@
-<section class="dashboard-container">
-  <h2 class="dashboard-title">Bienvenido al Panel de Control</h2>
+<section class="dashboard">
+  <div class="welcome-banner">
+    <div class="banner-content">
+      <span class="banner-pill">InventarioPRO</span>
+      <h1>Bienvenido al Panel de Control</h1>
+      <p>Monitorea la operación diaria, controla el inventario y actúa sobre las alertas en tiempo real.</p>
 
-  <!-- Primera sección: tarjetas de resumen -->
-  <div class="summary-section">
-    <mat-card class="summary-card blue">
-      <mat-icon>inventory_2</mat-icon>
-      <h3>Total de Productos</h3>
-      <p>{{ resumen.totalProductos || 0 }}</p>
+      <div class="banner-metrics">
+        <div class="metric">
+          <span class="metric-label">Actualizado</span>
+          <span class="metric-value">{{ fechaActual | date: 'EEEE d MMMM, y':'':'es' }}</span>
+        </div>
+        <div class="metric">
+          <span class="metric-label">Movimientos hoy</span>
+          <span class="metric-value highlight">{{ resumen.movimientosHoy ?? resumen.movimientos ?? 0 }}</span>
+        </div>
+      </div>
+    </div>
+    <div class="banner-illustration">
+      <div class="radar"></div>
+      <div class="pulse"></div>
+    </div>
+  </div>
+
+  <div class="summary-grid">
+    <mat-card class="summary-card">
+      <div class="summary-icon blue">
+        <mat-icon>inventory_2</mat-icon>
+      </div>
+      <div class="summary-info">
+        <span class="label">Total de Productos</span>
+        <span class="value">{{ resumen.totalProductos || 0 }}</span>
+        <span class="caption">Incluye todos los SKUs activos</span>
+      </div>
     </mat-card>
 
-    <mat-card class="summary-card orange">
-      <mat-icon>warning</mat-icon>
-      <h3>Stock Bajo</h3>
-      <p>{{ resumen.stockBajo || 0 }}</p>
+    <mat-card class="summary-card">
+      <div class="summary-icon amber">
+        <mat-icon>priority_high</mat-icon>
+      </div>
+      <div class="summary-info">
+        <span class="label">Stock Bajo</span>
+        <span class="value">{{ resumen.stockBajo || 0 }}</span>
+        <span class="caption">Necesitan reposición inmediata</span>
+      </div>
     </mat-card>
 
     <mat-card class="summary-card green">
@@ -21,17 +51,27 @@
       <p>{{ resumen.movimientosHoy ?? resumen.movimientos ?? 0 }}</p>
     </mat-card>
 
-    <mat-card class="summary-card red">
-      <mat-icon>notification_important</mat-icon>
-      <h3>Alertas Activas</h3>
-      <p>{{ resumen.alertasActivas || 0 }}</p>
+    <mat-card class="summary-card">
+      <div class="summary-icon red">
+        <mat-icon>notifications_active</mat-icon>
+      </div>
+      <div class="summary-info">
+        <span class="label">Alertas Activas</span>
+        <span class="value">{{ resumen.alertasActivas || 0 }}</span>
+        <span class="caption">Casos por revisar</span>
+      </div>
     </mat-card>
   </div>
 
-  <!-- Segunda sección: gráficos -->
-  <section class="chart-section">
+  <div class="content-grid">
     <mat-card class="chart-card">
-      <h3>Resumen de Movimientos</h3>
+      <div class="card-header">
+        <div>
+          <h3>Movimientos por Tipo</h3>
+          <p>Comparativo de entradas y salidas en los últimos días</p>
+        </div>
+        <span class="chip">Actualizado diario</span>
+      </div>
       <canvas
         baseChart
         [data]="chartData"
@@ -40,14 +80,69 @@
       </canvas>
     </mat-card>
 
-    <mat-card class="chart-card secondary">
-      <h3>Distribución del Inventario</h3>
+    <mat-card class="top-products-card">
+      <div class="card-header">
+        <div>
+          <h3>Top Productos</h3>
+          <p>Ranking por disponibilidad y estado</p>
+        </div>
+        <span class="chip success">Hoy</span>
+      </div>
+
+      <ul class="products-list">
+        <li *ngFor="let producto of topProductos">
+          <div class="product-details">
+            <span class="code">{{ producto.codigo }}</span>
+            <span class="name">{{ producto.nombre }}</span>
+          </div>
+          <div class="product-meta">
+            <span class="stock">{{ producto.stock }}</span>
+            <span class="status" [ngClass]="producto.estadoClass">{{ producto.estadoLabel }}</span>
+          </div>
+        </li>
+        <li *ngIf="!topProductos.length" class="empty">Sin información disponible.</li>
+      </ul>
+    </mat-card>
+  </div>
+
+  <div class="detail-grid">
+    <mat-card class="chart-card">
+      <div class="card-header">
+        <div>
+          <h3>Distribución del Inventario</h3>
+          <p>Disponibles, bajos y agotados</p>
+        </div>
+      </div>
       <canvas
         baseChart
         [data]="pieData"
         [options]="pieOptions"
-        [type]="'pie'">
+        [type]="'doughnut'">
       </canvas>
     </mat-card>
-  </section>
+
+    <mat-card class="activity-card">
+      <div class="card-header">
+        <div>
+          <h3>Actividad Reciente</h3>
+          <p>Últimos movimientos registrados</p>
+        </div>
+      </div>
+      <ul class="activity-list">
+        <li *ngFor="let movimiento of movimientosRecientes">
+          <div class="activity-icon" [ngClass]="movimiento.tipoClass">
+            <mat-icon>{{ movimiento.icono }}</mat-icon>
+          </div>
+          <div class="activity-info">
+            <span class="activity-title">{{ movimiento.descripcion }}</span>
+            <span class="activity-subtitle">{{ movimiento.fecha | date: 'dd MMM, HH:mm':'':'es' }}</span>
+          </div>
+          <span class="activity-amount" [ngClass]="movimiento.tipoClass">
+            {{ movimiento.signo }}{{ movimiento.cantidad }}
+          </span>
+        </li>
+        <li *ngIf="!movimientosRecientes.length" class="empty">Aún no hay movimientos registrados.</li>
+      </ul>
+    </mat-card>
+  </div>
 </section>

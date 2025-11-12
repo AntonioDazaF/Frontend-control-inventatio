@@ -29,13 +29,13 @@ import { ApiService } from '../../core/services/api.service';
 })
 export class InventoryListComponent implements OnInit {
   displayedColumns: string[] = [
-    'id',
+    'sku',
     'nombre',
     'categoria',
     'stock',
+    'minimo',
     'stockMaximo',
     'estado',
-    'precio',
     'acciones'
   ];
 
@@ -84,7 +84,7 @@ export class InventoryListComponent implements OnInit {
     const term = this.searchTerm.trim().toLowerCase();
     this.productos = term
       ? this.productosPagina.filter((producto) =>
-          [producto?.nombre, producto?.categoria]
+          [producto?.nombre, producto?.categoria, producto?.sku, producto?.codigo, producto?.id]
             .filter((value): value is string => typeof value === 'string')
             .some((value) => value.toLowerCase().includes(term))
         )
@@ -112,9 +112,9 @@ export class InventoryListComponent implements OnInit {
   }
 
   getEstadoClass(p: any): string {
-    if (p.stock === 0) return 'estado-rojo';
-    if (p.stock < p.minimo) return 'estado-naranja';
-    if (p.stock >= p.minimo && p.stock < p.stockMaximo) return 'estado-verde';
-    return 'estado-azul';
+    if (p.stock === 0) return 'danger';
+    if (p.stock < p.minimo) return 'warning';
+    if (p.stock >= p.minimo && p.stock < p.stockMaximo) return 'success';
+    return 'info';
   }
 }

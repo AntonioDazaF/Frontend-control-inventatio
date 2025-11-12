@@ -1,12 +1,39 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ApiService } from '../../app/core/services/api.service';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { Chart, BarController, BarElement, CategoryScale, LinearScale, Title, Tooltip, Legend } from 'chart.js';
+import {
+  Chart,
+  BarController,
+  BarElement,
+  CategoryScale,
+  LinearScale,
+  Title,
+  Tooltip,
+  Legend,
+  LineController,
+  LineElement,
+  PointElement,
+  Filler
+} from 'chart.js';
+import { forkJoin, Observable, of } from 'rxjs';
+import { catchError, map, switchMap } from 'rxjs/operators';
 
-Chart.register(BarController, BarElement, CategoryScale, LinearScale, Title, Tooltip, Legend);
+Chart.register(
+  BarController,
+  BarElement,
+  CategoryScale,
+  LinearScale,
+  Title,
+  Tooltip,
+  Legend,
+  LineController,
+  LineElement,
+  PointElement,
+  Filler
+);
 
 @Component({
   selector: 'app-reports',
@@ -24,7 +51,7 @@ export class ReportsComponent implements OnInit {
   constructor(private api: ApiService) {}
 
   ngOnInit(): void {
-    this.cargarResumen();
+    this.cargarDatos();
   }
 
   cargarResumen(): void {
@@ -90,7 +117,24 @@ export class ReportsComponent implements OnInit {
         console.error('Error cargando reportes:', err);
         this.renderChart();
       }
+
+      const stock = this.toNumber(producto?.stock);
+      const minimo = this.toNumber(producto?.minimo);
+      const precio = this.toNumber(producto?.precioUnitario);
+
+      if (stock <= 0 || (minimo > 0 && stock < minimo)) {
+        stockBajo += 1;
+      }
+
+      valorTotal += stock * precio;
     });
+
+    return {
+      totalProductos: productos.length,
+      valorTotal,
+      stockBajo,
+      categorias: categorias.size,
+    };
   }
 
   private obtenerIdentificadorMovimiento(movimiento: any): string | null {
@@ -142,18 +186,151 @@ export class ReportsComponent implements OnInit {
         }]
       },
       options: {
+        indexAxis: 'y',
         responsive: true,
+        maintainAspectRatio: false,
         plugins: {
-          title: {
-            display: true,
-            text: 'Movimientos Totales'
+          legend: { display: false }
+        },
+        scales: {
+          x: {
+            grid: { color: 'rgba(148, 163, 184, 0.2)' },
+            ticks: { color: '#94a3b8', precision: 0 }
           },
-          legend: {
-            display: false
+          y: {
+            grid: { display: false },
+            ticks: { color: '#475569', font: { family: 'Inter', size: 12, weight: 600 } }
           }
         }
       }
     });
+
+    this.charts.push(chart);
+  }
+
+  private renderRecepcionChart(movimientos: any[]): void {
+    const canvas = document.getElementById('recepcionChart') as HTMLCanvasElement;
+    if (!canvas) {
+      return;
+    }
+
+    const recepcion = this.agruparPorFecha(movimientos, 'ENTRADA', true);
+    const chart = new Chart(canvas, {
+      type: 'line',
+      data: {
+        labels: recepcion.labels,
+        datasets: [
+          {
+            label: 'Unidades recibidas',
+            data: recepcion.entradas,
+            borderColor: '#10b981',
+            backgroundColor: 'rgba(16, 185, 129, 0.12)',
+            fill: true,
+            tension: 0.35,
+            borderWidth: 3,
+            pointBackgroundColor: '#10b981',
+            pointBorderColor: '#ffffff',
+            pointBorderWidth: 2,
+            pointRadius: 4,
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          x: {
+            grid: { display: false },
+            ticks: { color: '#64748b', font: { family: 'Inter', size: 12, weight: 600 } }
+          },
+          y: {
+            grid: { color: 'rgba(148, 163, 184, 0.2)' },
+            ticks: { color: '#94a3b8', precision: 0 }
+          }
+        }
+      }
+    });
+
+    this.charts.push(chart);
+  }
+
+  private agruparPorFecha(movimientos: any[], filtroTipo?: string, usarCantidad = false) {
+    if (!Array.isArray(movimientos)) {
+      return { labels: [], entradas: [], salidas: [] };
+    }
+
+    const mapa = new Map<string, { entradas: number; salidas: number }>();
+
+    movimientos.forEach((movimiento) => {
+      const tipo = (movimiento?.tipo || '').toUpperCase();
+      if (filtroTipo && tipo !== filtroTipo) {
+        return;
+      }
+
+      const fecha = this.parseFecha(movimiento?.fecha);
+      if (!fecha) {
+        return;
+      }
+
+      const clave = fecha.toISOString().slice(0, 10);
+      if (!mapa.has(clave)) {
+        mapa.set(clave, { entradas: 0, salidas: 0 });
+      }
+
+      const registro = mapa.get(clave)!;
+      const cantidad = usarCantidad ? this.toNumber(movimiento?.cantidad, 0) : 1;
+
+      if (tipo === 'ENTRADA') {
+        registro.entradas += cantidad;
+      } else if (tipo === 'SALIDA') {
+        registro.salidas += cantidad;
+      }
+    });
+
+    const clavesOrdenadas = Array.from(mapa.keys()).sort();
+    const ultimas = clavesOrdenadas.slice(-8);
+
+    return {
+      labels: ultimas.map((clave) => this.formatearFechaCorta(clave)),
+      entradas: ultimas.map((clave) => mapa.get(clave)?.entradas ?? 0),
+      salidas: ultimas.map((clave) => mapa.get(clave)?.salidas ?? 0),
+    };
+  }
+
+  private agruparPorProducto(movimientos: any[], tipo: 'ENTRADA' | 'SALIDA') {
+    if (!Array.isArray(movimientos)) {
+      return { labels: [], valores: [] };
+    }
+
+    const mapa = new Map<string, number>();
+
+    movimientos.forEach((movimiento) => {
+      if ((movimiento?.tipo || '').toUpperCase() !== tipo) {
+        return;
+      }
+
+      const producto =
+        movimiento?.producto?.nombre ||
+        movimiento?.productoNombre ||
+        movimiento?.producto?.sku ||
+        movimiento?.producto?.codigo ||
+        'Producto';
+
+      const cantidad = this.toNumber(movimiento?.cantidad, 0);
+      mapa.set(producto, (mapa.get(producto) ?? 0) + cantidad);
+    });
+
+    const ordenado = Array.from(mapa.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 6);
+
+    return {
+      labels: ordenado.map(([producto]) => producto),
+      valores: ordenado.map(([, cantidad]) => cantidad),
+    };
   }
 
   descargarInventarioPDF(): void {

@@ -29,7 +29,7 @@ import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
   styleUrls: ['./movement-list.component.css']
 })
 export class MovementListComponent implements OnInit {
-  displayedColumns: string[] = ['id', 'producto', 'tipo', 'cantidad', 'fecha', 'usuario'];
+  displayedColumns: string[] = ['fecha', 'tipo', 'producto', 'cantidad', 'usuario'];
   movimientos: any[] = [];
   private movimientosPagina: any[] = [];
   searchTerm = '';
@@ -38,6 +38,7 @@ export class MovementListComponent implements OnInit {
   pageSize = 10;
   pageIndex = 0;
   readonly pageSizeOptions = [10, 25, 50, 100];
+  tipoFiltro: 'todos' | 'entrada' | 'salida' = 'todos';
 
   constructor(
     private api: ApiService,
@@ -95,9 +96,19 @@ export class MovementListComponent implements OnInit {
 
   private aplicarFiltro(): void {
     const term = this.searchTerm.trim().toLowerCase();
-    this.movimientos = term
-      ? this.movimientosPagina.filter((m) => m.producto?.nombre?.toLowerCase().includes(term))
-      : [...this.movimientosPagina];
+    this.movimientos = this.movimientosPagina.filter((m) => {
+      const nombre = (m.producto?.nombre || m.productoNombre || '').toLowerCase();
+      const coincideBusqueda = term ? nombre.includes(term) : true;
+      const tipo = (m.tipo || '').toUpperCase();
+      const coincideTipo =
+        this.tipoFiltro === 'todos'
+          ? true
+          : this.tipoFiltro === 'entrada'
+            ? tipo === 'ENTRADA'
+            : tipo === 'SALIDA';
+
+      return coincideBusqueda && coincideTipo;
+    });
   }
 
   cambiarPagina(evento: PageEvent): void {
@@ -108,5 +119,10 @@ export class MovementListComponent implements OnInit {
 
   nuevoMovimiento(): void {
     this.router.navigate(['/movements/new']);
+  }
+
+  cambiarFiltro(tipo: 'todos' | 'entrada' | 'salida'): void {
+    this.tipoFiltro = tipo;
+    this.aplicarFiltro();
   }
 }

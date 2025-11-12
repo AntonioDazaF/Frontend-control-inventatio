@@ -15,7 +15,7 @@ import { catchError, map, switchMap } from 'rxjs/operators';
 import { ApiService } from '../../app/core/services/api.service';
 
 type BarChartData = ChartData<'bar'>;
-type PieChartData = ChartData<'pie'>;
+type PieChartData = ChartData<'doughnut'>;
 
 interface DashboardResumen {
   totalProductos: number;
@@ -32,6 +32,23 @@ type InventoryDistribution = {
   stockBajo: number;
   agotados: number;
 };
+
+interface TopProductoVista {
+  codigo: string;
+  nombre: string;
+  stock: number;
+  estadoLabel: string;
+  estadoClass: 'success' | 'warning' | 'danger';
+}
+
+interface MovimientoReciente {
+  descripcion: string;
+  fecha: Date;
+  cantidad: number;
+  signo: '+' | '-';
+  tipoClass: 'entrada' | 'salida';
+  icono: string;
+}
 
 @Component({
   selector: 'app-dashboard',
@@ -57,9 +74,18 @@ export class DashboardComponent implements OnInit {
     labels: ['Productos', 'Movimientos Hoy', 'Alertas'],
     datasets: [
       {
-        label: 'Totales',
-        data: [0, 0, 0],
-        backgroundColor: ['#1976d2', '#43a047', '#e53935'],
+        label: 'Entradas',
+        data: [],
+        backgroundColor: '#3b82f6',
+        borderRadius: 14,
+        maxBarThickness: 48,
+      },
+      {
+        label: 'Salidas',
+        data: [],
+        backgroundColor: '#f43f5e',
+        borderRadius: 14,
+        maxBarThickness: 48,
       },
     ],
   };
@@ -69,18 +95,80 @@ export class DashboardComponent implements OnInit {
     datasets: [
       {
         data: [0, 0, 0],
-        backgroundColor: ['#42a5f5', '#ffb300', '#e53935'],
+        backgroundColor: ['#2563eb', '#f59e0b', '#f43f5e'],
+        borderWidth: 0,
       },
     ],
   };
 
   chartOptions: ChartOptions<'bar'> = {
     responsive: true,
-    plugins: { legend: { position: 'bottom' } },
+    maintainAspectRatio: false,
+    scales: {
+      x: {
+        grid: {
+          display: false,
+        },
+        ticks: {
+          color: '#64748b',
+          font: {
+            family: 'Inter',
+            size: 12,
+            weight: 600,
+          },
+        },
+      },
+      y: {
+        grid: {
+          color: 'rgba(148, 163, 184, 0.2)',
+        },
+        ticks: {
+          color: '#94a3b8',
+          font: {
+            family: 'Inter',
+            size: 12,
+          },
+          precision: 0,
+        },
+      },
+    },
+    plugins: {
+      legend: {
+        position: 'bottom',
+        labels: {
+          usePointStyle: true,
+          color: '#475569',
+          font: {
+            family: 'Inter',
+            size: 12,
+            weight: 600,
+          },
+        },
+      },
+      tooltip: {
+        callbacks: {
+          label: (context) => `${context.dataset.label}: ${context.parsed.y ?? 0}`,
+        },
+      },
+    },
   };
-  pieOptions: ChartOptions<'pie'> = {
+  pieOptions: ChartOptions<'doughnut'> = {
     responsive: true,
-    plugins: { legend: { position: 'bottom' } },
+    cutout: '70%',
+    plugins: {
+      legend: {
+        position: 'bottom',
+        labels: {
+          usePointStyle: true,
+          color: '#475569',
+          font: {
+            family: 'Inter',
+            size: 12,
+            weight: 600,
+          },
+        },
+      },
+    },
   };
 
   constructor(private api: ApiService) {}
