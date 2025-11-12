@@ -84,39 +84,107 @@ export class DashboardComponent implements OnInit {
   constructor(private api: ApiService) {}
 
   ngOnInit(): void {
-    this.api.get<DashboardResumen>('dashboard/resumen').subscribe({
-      next: (data: DashboardResumen) => {
-        this.resumen = data;
+    forkJoin({
+      resumen: this.api.getDashboardResumen().pipe(
+        catchError((err) => {
+          console.error('Error cargando resumen', err);
+          return of(null);
+        })
+      ),
+      productos: this.api.getProductos().pipe(
+        catchError((err) => {
+          console.error('Error cargando productos para dashboard', err);
+          return of([]);
+        }),
+        map((response: any) => {
+          if (!response) {
+            return [];
+          }
 
-        this.chartData = {
-          ...this.chartData,
-          datasets: [
-            {
-              ...this.chartData.datasets[0],
-              data: [
-                data.totalProductos ?? 0,
-                data.movimientos ?? 0,
-                data.alertasActivas ?? 0,
-              ],
-            },
-          ],
-        };
+          if (Array.isArray(response)) {
+            return response;
+          }
 
-        this.pieData = {
-          ...this.pieData,
-          datasets: [
-            {
-              ...this.pieData.datasets[0],
-              data: [
-                data.productosDisponibles ?? 0,
-                data.stockBajo ?? 0,
-                data.productosAgotados ?? 0,
-              ],
-            },
-          ],
-        };
-      },
-      error: (err: unknown) => console.error('Error cargando resumen', err),
+          if (Array.isArray(response?.content)) {
+            return response.content;
+          }
+
+          if (Array.isArray(response?.items)) {
+            return response.items;
+          }
+
+          return [];
+        })
+      )
+    }).subscribe(({ resumen, productos }) => {
+      const distribution = this.calcularDistribucion(productos);
+      const totalProductos = resumen?.totalProductos ?? productos.length;
+      const movimientos = resumen?.movimientos ?? 0;
+
+      const resumenCalculado: Partial<DashboardResumen> = {
+        ...resumen,
+        totalProductos,
+        movimientos,
+        productosDisponibles: distribution.disponibles,
+        stockBajo: distribution.stockBajo,
+        productosAgotados: distribution.agotados,
+        alertasActivas: distribution.stockBajo,
+      };
+
+      this.resumen = resumenCalculado;
+
+      this.chartData = {
+        ...this.chartData,
+        datasets: [
+          {
+            ...this.chartData.datasets[0],
+            data: [
+              resumenCalculado.totalProductos ?? 0,
+              resumenCalculado.movimientos ?? 0,
+              resumenCalculado.alertasActivas ?? 0,
+            ],
+          },
+        ],
+      };
+
+      this.pieData = {
+        ...this.pieData,
+        datasets: [
+          {
+            ...this.pieData.datasets[0],
+            data: [
+              distribution.disponibles,
+              distribution.stockBajo,
+              distribution.agotados,
+            ],
+          },
+        ],
+      };
     });
+  }
+
+  private calcularDistribucion(productos: any[]): InventoryDistribution {
+    return productos.reduce<InventoryDistribution>((acumulado, producto) => {
+      const stock = this.toNumber(producto?.stock);
+      const minimo = this.toNumber(producto?.minimo);
+
+      if (stock <= 0) {
+        acumulado.agotados += 1;
+        return acumulado;
+      }
+
+      if (minimo > 0 && stock < minimo) {
+        acumulado.stockBajo += 1;
+        return acumulado;
+      }
+
+      acumulado.disponibles += 1;
+      return acumulado;
+    }, { disponibles: 0, stockBajo: 0, agotados: 0 });
+  }
+
+  private toNumber(valor: unknown, defecto = 0): number {
+    const numero = Number(valor);
+    return Number.isFinite(numero) ? numero : defecto;
   }
 }
