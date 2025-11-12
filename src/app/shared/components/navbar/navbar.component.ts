@@ -22,7 +22,6 @@ interface RoleDisplayConfig {
   standalone: true,
   imports: [
     CommonModule,
-    MatToolbarModule,
     MatIconModule,
     MatButtonModule,
     MatTooltipModule,
