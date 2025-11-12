@@ -84,13 +84,7 @@ export class InventoryListComponent implements OnInit {
     const term = this.searchTerm.trim().toLowerCase();
     this.productos = term
       ? this.productosPagina.filter((producto) =>
-          [
-            producto && producto.nombre,
-            producto && producto.categoria,
-            producto && producto.sku,
-            producto && producto.codigo,
-            producto && producto.id
-          ]
+          [producto?.nombre, producto?.categoria, producto?.sku, producto?.codigo, producto?.id]
             .filter((value): value is string => typeof value === 'string')
             .some((value) => value.toLowerCase().includes(term))
         )

@@ -60,24 +60,6 @@
   font-weight: 500;
 }
 
-.navbar-center {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.title {
-  font-weight: 700;
-  font-size: 20px;
-  color: #0f172a;
-}
-
-.subtitle {
-  font-size: 13px;
-  color: #64748b;
-  font-weight: 500;
-}
-
 .navbar-right {
   display: flex;
   align-items: center;
@@ -143,7 +125,6 @@
 
 .user-chip button {
   margin-left: 4px;
-  color: #0f4ab8;
 }
 
 @media (max-width: 960px) {
@@ -154,25 +135,20 @@
     padding: 20px;
   }
 
-  .navbar-left,
-  .navbar-center,
   .navbar-right {
-    justify-content: center;
-  }
-
-  .navbar-right {
+    width: 100%;
     justify-content: flex-end;
   }
 }
 
 @media (max-width: 600px) {
   .navbar {
-    padding: 16px;
-    gap: 16px;
+    gap: 12px;
   }
 
-  .navbar-left {
-    justify-content: space-between;
+  .navbar-right {
+    width: 100%;
+    justify-content: flex-end;
   }
 
   .user-chip {

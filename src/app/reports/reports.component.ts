@@ -42,16 +42,11 @@ Chart.register(
   templateUrl: './reports.component.html',
   styleUrls: ['./reports.component.css']
 })
-export class ReportsComponent implements OnInit, OnDestroy {
-  resumen = {
-    totalProductos: 0,
-    valorTotal: 0,
-    stockBajo: 0,
-    categorias: 0,
-  };
-
-  private readonly pageSize = 200;
-  private charts: Chart[] = [];
+export class ReportsComponent implements OnInit {
+  movimientosData: any[] = [];
+  private chart?: Chart;
+  private readonly pageSize = 100;
+  private movimientoIds = new Set<string>();
 
   constructor(private api: ApiService) {}
 
@@ -59,64 +54,25 @@ export class ReportsComponent implements OnInit, OnDestroy {
     this.cargarDatos();
   }
 
-  ngOnDestroy(): void {
-    this.destruirCharts();
+  cargarResumen(): void {
+    this.movimientosData = [];
+    this.movimientoIds.clear();
+    if (this.chart) {
+      this.chart.destroy();
+      this.chart = undefined;
+    }
+
+    this.cargarPaginaMovimientos();
   }
 
-  private cargarDatos(): void {
-    forkJoin({
-      productos: this.obtenerProductos(),
-      movimientos: this.obtenerMovimientos()
-    }).subscribe(({ productos, movimientos }) => {
-      this.resumen = this.calcularResumen(productos);
-      this.destruirCharts();
-      this.renderTendenciasChart(movimientos);
-      this.renderConsumoChart(movimientos);
-      this.renderRecepcionChart(movimientos);
-    });
-  }
-
-  private obtenerProductos(): Observable<any[]> {
-    return this.api.getProductos().pipe(
-      map((response: any) => {
-        if (!response) {
-          return [];
-        }
-        if (Array.isArray(response)) {
-          return response;
-        }
-
-        const contenido = response && response.content;
-        if (Array.isArray(contenido)) {
-          return contenido;
-        }
-
-        const items = response && response.items;
-        if (Array.isArray(items)) {
-          return items;
-        }
-
-        return [];
-      }),
-      catchError((err) => {
-        console.error('Error cargando productos para reportes', err);
-        return of([]);
-      })
-    );
-  }
-
-  private obtenerMovimientos(
-    page = 0,
-    size = this.pageSize,
-    acumulado: any[] = [],
-    ids: Set<string> = new Set()
-  ): Observable<any[]> {
-    return this.api.getMovimientos(page, size).pipe(
-      switchMap((data: any) => {
-        const paginaActual = Array.isArray(data) ? data : (data && data.content) || [];
+  private cargarPaginaMovimientos(page: number = 0): void {
+    this.api.getMovimientos(page, this.pageSize).subscribe({
+      next: (data: any) => {
+        const paginaActual = Array.isArray(data) ? data : data.content || [];
 
         if (!paginaActual.length) {
-          return of(acumulado);
+          this.renderChart();
+          return;
         }
 
         const nuevosMovimientos = paginaActual.filter((movimiento: any) => {
@@ -124,88 +80,47 @@ export class ReportsComponent implements OnInit, OnDestroy {
           if (!identificador) {
             return true;
           }
-          if (ids.has(identificador)) {
+          if (this.movimientoIds.has(identificador)) {
             return false;
           }
-          ids.add(identificador);
+          this.movimientoIds.add(identificador);
           return true;
         });
 
-        const acumuladoActual = [...acumulado, ...nuevosMovimientos];
+        this.movimientosData.push(...nuevosMovimientos);
 
         if (Array.isArray(data)) {
-          const paginaLlena = paginaActual.length === size;
-          if (paginaLlena && nuevosMovimientos.length) {
-            return this.obtenerMovimientos(page + 1, size, acumuladoActual, ids);
-          }
-          return of(acumuladoActual);
+          this.renderChart();
+          return;
         }
 
-        const sizeActual = data && typeof data.size === 'number' ? data.size : size;
-        const currentPage = data && typeof data.number === 'number' ? data.number : page;
-        const totalElements = data && typeof data.totalElements === 'number' ? data.totalElements : undefined;
-        const totalPages =
-          data && typeof data.totalPages === 'number'
-            ? data.totalPages
-            : totalElements && sizeActual
-              ? Math.ceil(totalElements / sizeActual)
-              : undefined;
+        const totalElements = typeof data.totalElements === 'number' ? data.totalElements : undefined;
+        const totalPages = typeof data.totalPages === 'number'
+          ? data.totalPages
+          : totalElements && data.size
+            ? Math.ceil(totalElements / data.size)
+            : undefined;
+        const currentPage = typeof data.number === 'number' ? data.number : page;
 
         const hayMasPaginas = totalPages !== undefined && currentPage + 1 < totalPages;
-        const faltanElementos = totalElements !== undefined && acumuladoActual.length < totalElements;
-        const paginaLlena = paginaActual.length === sizeActual;
+        const faltanElementos = totalElements !== undefined && this.movimientosData.length < totalElements;
+        const paginaLlena = paginaActual.length === (data.size ?? this.pageSize);
+        const seAgregaronNuevos = nuevosMovimientos.length > 0;
 
-        if (hayMasPaginas || faltanElementos || (paginaLlena && nuevosMovimientos.length)) {
-          return this.obtenerMovimientos(currentPage + 1, sizeActual, acumuladoActual, ids);
+        if (hayMasPaginas || faltanElementos || (paginaLlena && seAgregaronNuevos)) {
+          this.cargarPaginaMovimientos(currentPage + 1);
+        } else {
+          this.renderChart();
         }
-
-        return of(acumuladoActual);
-      }),
-      catchError((err) => {
-        console.error('Error cargando movimientos para reportes', err);
-        return of(acumulado);
-      })
-    );
-  }
-
-  private obtenerIdentificadorMovimiento(movimiento: any): string | null {
-    if (movimiento == null || typeof movimiento !== 'object') {
-      return null;
-    }
-
-    if (movimiento.id !== undefined && movimiento.id !== null) {
-      return `id:${movimiento.id}`;
-    }
-
-    if (movimiento.codigo !== undefined && movimiento.codigo !== null) {
-      return `codigo:${movimiento.codigo}`;
-    }
-
-    if (movimiento.productoId !== undefined && movimiento.fecha) {
-      const tipo = movimiento.tipo ? movimiento.tipo : '';
-      return `ref:${movimiento.productoId}-${movimiento.fecha}-${tipo}`;
-    }
-
-    return null;
-  }
-
-  private calcularResumen(productos: any[]): { totalProductos: number; valorTotal: number; stockBajo: number; categorias: number } {
-    if (!Array.isArray(productos)) {
-      return this.resumen;
-    }
-
-    const categorias = new Set<string>();
-    let stockBajo = 0;
-    let valorTotal = 0;
-
-    productos.forEach((producto) => {
-      if (producto && producto.categoria) {
-        categorias.add(producto.categoria);
+      },
+      error: (err) => {
+        console.error('Error cargando reportes:', err);
+        this.renderChart();
       }
 
-      const stock = this.toNumber(producto && producto.stock);
-      const minimo = this.toNumber(producto && producto.minimo);
-      const precio = this.toNumber(producto && producto.precioUnitario);
+      const stock = this.toNumber(producto?.stock);
+      const minimo = this.toNumber(producto?.minimo);
+      const precio = this.toNumber(producto?.precioUnitario);
 
       if (stock <= 0 || (minimo > 0 && stock < minimo)) {
         stockBajo += 1;
@@ -222,83 +137,55 @@ export class ReportsComponent implements OnInit, OnDestroy {
     };
   }
 
+  private obtenerIdentificadorMovimiento(movimiento: any): string | null {
+    if (movimiento == null || typeof movimiento !== 'object') {
+      return null;
+    }
+
+    if (movimiento.id !== undefined && movimiento.id !== null) {
+      return `id:${movimiento.id}`;
+    }
+
+    if (movimiento.codigo !== undefined && movimiento.codigo !== null) {
+      return `codigo:${movimiento.codigo}`;
+    }
+
+    if (movimiento.productoId !== undefined && movimiento.fecha) {
+      return `ref:${movimiento.productoId}-${movimiento.fecha}-${movimiento.tipo ?? ''}`;
+    }
+
+    return null;
+  }
+
   private renderTendenciasChart(movimientos: any[]): void {
     const canvas = document.getElementById('tendenciasChart') as HTMLCanvasElement;
     if (!canvas) {
       return;
     }
 
-    const tendencias = this.agruparPorFecha(movimientos);
-    const chart = new Chart(canvas, {
-      type: 'bar',
-      data: {
-        labels: tendencias.labels,
-        datasets: [
-          {
-            label: 'Entradas',
-            data: tendencias.entradas,
-            backgroundColor: '#2563eb',
-            borderRadius: 18,
-            maxBarThickness: 48,
-          },
-          {
-            label: 'Salidas',
-            data: tendencias.salidas,
-            backgroundColor: '#f43f5e',
-            borderRadius: 18,
-            maxBarThickness: 48,
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            position: 'bottom',
-            labels: {
-              usePointStyle: true,
-              color: '#475569',
-              font: { family: 'Inter', size: 12, weight: 600 }
-            }
-          }
-        },
-        scales: {
-          x: {
-            grid: { display: false },
-            ticks: { color: '#64748b', font: { family: 'Inter', size: 12, weight: 600 } }
-          },
-          y: {
-            grid: { color: 'rgba(148, 163, 184, 0.2)' },
-            ticks: { color: '#94a3b8', precision: 0 }
-          }
-        }
-      }
-    });
-
-    this.charts.push(chart);
-  }
-
-  private renderConsumoChart(movimientos: any[]): void {
-    const canvas = document.getElementById('consumoChart') as HTMLCanvasElement;
-    if (!canvas) {
-      return;
+    if (this.chart) {
+      this.chart.destroy();
     }
 
-    const consumo = this.agruparPorProducto(movimientos, 'SALIDA');
-    const chart = new Chart(canvas, {
+    const totales = this.movimientosData.reduce((acc, movimiento) => {
+      const tipo = (movimiento?.tipo || '').toUpperCase();
+      if (tipo === 'ENTRADA') {
+        acc.entradas += 1;
+      } else if (tipo === 'SALIDA') {
+        acc.salidas += 1;
+      }
+      return acc;
+    }, { entradas: 0, salidas: 0 });
+
+    this.chart = new Chart(ctx, {
       type: 'bar',
       data: {
-        labels: consumo.labels,
-        datasets: [
-          {
-            label: 'Unidades consumidas',
-            data: consumo.valores,
-            backgroundColor: '#f97316',
-            borderRadius: 16,
-            maxBarThickness: 36,
-          }
-        ]
+        labels: ['Entradas', 'Salidas'],
+        datasets: [{
+          label: 'Movimientos',
+          data: [totales.entradas, totales.salidas],
+          backgroundColor: ['#42a5f5', '#ef5350']
+        }]
       },
       options: {
         indexAxis: 'y',
@@ -380,12 +267,12 @@ export class ReportsComponent implements OnInit, OnDestroy {
     const mapa = new Map<string, { entradas: number; salidas: number }>();
 
     movimientos.forEach((movimiento) => {
-      const tipo = ((movimiento && movimiento.tipo) || '').toUpperCase();
+      const tipo = (movimiento?.tipo || '').toUpperCase();
       if (filtroTipo && tipo !== filtroTipo) {
         return;
       }
 
-      const fecha = this.parseFecha(movimiento ? movimiento.fecha : undefined);
+      const fecha = this.parseFecha(movimiento?.fecha);
       if (!fecha) {
         return;
       }
@@ -396,7 +283,7 @@ export class ReportsComponent implements OnInit, OnDestroy {
       }
 
       const registro = mapa.get(clave)!;
-      const cantidad = usarCantidad ? this.toNumber(movimiento ? movimiento.cantidad : undefined, 0) : 1;
+      const cantidad = usarCantidad ? this.toNumber(movimiento?.cantidad, 0) : 1;
 
       if (tipo === 'ENTRADA') {
         registro.entradas += cantidad;
@@ -410,14 +297,8 @@ export class ReportsComponent implements OnInit, OnDestroy {
 
     return {
       labels: ultimas.map((clave) => this.formatearFechaCorta(clave)),
-      entradas: ultimas.map((clave) => {
-        const registro = mapa.get(clave);
-        return registro ? registro.entradas : 0;
-      }),
-      salidas: ultimas.map((clave) => {
-        const registro = mapa.get(clave);
-        return registro ? registro.salidas : 0;
-      }),
+      entradas: ultimas.map((clave) => mapa.get(clave)?.entradas ?? 0),
+      salidas: ultimas.map((clave) => mapa.get(clave)?.salidas ?? 0),
     };
   }
 
@@ -429,21 +310,19 @@ export class ReportsComponent implements OnInit, OnDestroy {
     const mapa = new Map<string, number>();
 
     movimientos.forEach((movimiento) => {
-      const tipoMovimiento = ((movimiento && movimiento.tipo) || '').toUpperCase();
-      if (tipoMovimiento !== tipo) {
+      if ((movimiento?.tipo || '').toUpperCase() !== tipo) {
         return;
       }
 
       const producto =
-        (movimiento && movimiento.producto && movimiento.producto.nombre) ||
-        (movimiento && movimiento.productoNombre) ||
-        (movimiento && movimiento.producto && movimiento.producto.sku) ||
-        (movimiento && movimiento.producto && movimiento.producto.codigo) ||
+        movimiento?.producto?.nombre ||
+        movimiento?.productoNombre ||
+        movimiento?.producto?.sku ||
+        movimiento?.producto?.codigo ||
         'Producto';
 
-      const cantidad = this.toNumber(movimiento ? movimiento.cantidad : undefined, 0);
-      const acumulado = mapa.has(producto) ? mapa.get(producto)! : 0;
-      mapa.set(producto, acumulado + cantidad);
+      const cantidad = this.toNumber(movimiento?.cantidad, 0);
+      mapa.set(producto, (mapa.get(producto) ?? 0) + cantidad);
     });
 
     const ordenado = Array.from(mapa.entries())
@@ -466,51 +345,5 @@ export class ReportsComponent implements OnInit, OnDestroy {
 
   descargarInventarioExcel(): void {
     this.api.descargarArchivo('/reportes/inventario/excel', 'inventario.xlsx', 'excel');
-  }
-
-  private formatearFechaCorta(fechaISO: string): string {
-    const fecha = new Date(fechaISO);
-    return fecha.toLocaleDateString('es', {
-      month: 'short',
-      day: '2-digit',
-    });
-  }
-
-  private parseFecha(fecha: unknown): Date | null {
-    if (!fecha) {
-      return null;
-    }
-
-    if (fecha instanceof Date) {
-      return fecha;
-    }
-
-    if (typeof fecha === 'string' || typeof fecha === 'number') {
-      const date = new Date(fecha);
-      return Number.isFinite(date.getTime()) ? date : null;
-    }
-
-    if (
-      typeof fecha === 'object' &&
-      fecha !== null &&
-      'year' in (fecha as any) &&
-      'monthValue' in (fecha as any) &&
-      'dayOfMonth' in (fecha as any)
-    ) {
-      const { year, monthValue, dayOfMonth } = fecha as { year: number; monthValue: number; dayOfMonth: number };
-      return new Date(year, monthValue - 1, dayOfMonth);
-    }
-
-    return null;
-  }
-
-  private destruirCharts(): void {
-    this.charts.forEach((chart) => chart.destroy());
-    this.charts = [];
-  }
-
-  private toNumber(valor: unknown, defecto = 0): number {
-    const numero = Number(valor);
-    return Number.isFinite(numero) ? numero : defecto;
   }
 }

@@ -97,12 +97,7 @@ export class MovementListComponent implements OnInit {
   private aplicarFiltro(): void {
     const term = this.searchTerm.trim().toLowerCase();
     this.movimientos = this.movimientosPagina.filter((m) => {
-      const nombre =
-        (
-          (m.producto && m.producto.nombre) ||
-          m.productoNombre ||
-          ''
-        ).toLowerCase();
+      const nombre = (m.producto?.nombre || m.productoNombre || '').toLowerCase();
       const coincideBusqueda = term ? nombre.includes(term) : true;
       const tipo = (m.tipo || '').toUpperCase();
       const coincideTipo =

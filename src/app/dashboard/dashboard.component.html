@@ -45,15 +45,10 @@
       </div>
     </mat-card>
 
-    <mat-card class="summary-card">
-      <div class="summary-icon green">
-        <mat-icon>show_chart</mat-icon>
-      </div>
-      <div class="summary-info">
-        <span class="label">Movimientos Hoy</span>
-        <span class="value">{{ resumen.movimientosHoy ?? resumen.movimientos ?? 0 }}</span>
-        <span class="caption">Entradas y salidas registradas</span>
-      </div>
+    <mat-card class="summary-card green">
+      <mat-icon>trending_up</mat-icon>
+      <h3>Movimientos Hoy</h3>
+      <p>{{ resumen.movimientosHoy ?? resumen.movimientos ?? 0 }}</p>
     </mat-card>
 
     <mat-card class="summary-card">
