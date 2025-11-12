@@ -1,14 +1,24 @@
-<mat-toolbar color="primary">
-  <button mat-icon-button (click)="toggleSidenav()" matTooltip="Menú">
-    <mat-icon>menu</mat-icon>
-  </button>
+<header class="navbar" role="banner">
+  <div class="navbar-left">
+    <button mat-icon-button (click)="toggleSidenav()" matTooltip="Menú" class="menu-button">
+      <mat-icon>menu</mat-icon>
+    </button>
+    <div class="navbar-title">
+      <span class="title">Panel de Control</span>
+      <span class="subtitle">Bienvenido a InventarioPRO</span>
+    </div>
+  </div>
 
-  <span class="navbar-title">Control de Inventario</span>
-
-  <span class="spacer"></span>
-
-  <button mat-icon-button matTooltip="Cerrar sesión" (click)="logout()">
-    <mat-icon>logout</mat-icon>
-  </button>
-</mat-toolbar>
-<!-- IGNORE -->
+  <div class="navbar-right">
+    <div class="user-chip">
+      <div class="user-avatar" [ngClass]="avatarClass">{{ avatarText }}</div>
+      <div class="user-info">
+        <span class="user-name">{{ userName }}</span>
+        <span class="user-role">{{ userRoleLabel }}</span>
+      </div>
+      <button mat-icon-button matTooltip="Cerrar sesión" (click)="logout()">
+        <mat-icon>logout</mat-icon>
+      </button>
+    </div>
+  </div>
+</header>
