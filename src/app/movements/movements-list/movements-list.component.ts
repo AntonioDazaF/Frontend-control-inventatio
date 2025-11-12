@@ -55,7 +55,7 @@ export class MovementListComponent implements OnInit {
     this.api.getMovimientosPage(page, size).subscribe({
       next: (data) => {
         const movimientos = Array.isArray(data) ? data : data.content || [];
-        this.movimientosPagina = movimientos.map((m: any) => ({ ...m }));
+        this.movimientosPagina = movimientos.map((m) => ({ ...m }));
 
         if (!Array.isArray(data)) {
           this.totalMovimientos = data.totalElements ?? movimientos.length;

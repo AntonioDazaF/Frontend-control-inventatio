@@ -1,4 +1,4 @@
-<header class="navbar" role="banner">
+<mat-toolbar class="navbar">
   <div class="navbar-left">
     <button mat-icon-button (click)="toggleSidenav()" matTooltip="Menú" class="menu-button">
       <mat-icon>menu</mat-icon>
@@ -15,10 +15,31 @@
       <div class="user-info">
         <span class="user-name">{{ userName }}</span>
         <span class="user-role">{{ userRoleLabel }}</span>
+  <div class="navbar-center">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-icon matPrefix>search</mat-icon>
+      <input matInput placeholder="Buscar en el panel" />
+    </mat-form-field>
+  </div>
+
+  <div class="navbar-right">
+    <button mat-stroked-button color="primary" class="action-button">
+      <mat-icon>download</mat-icon>
+      Exportar
+    </button>
+    <button mat-flat-button color="primary" class="action-button">
+      <mat-icon>add</mat-icon>
+      Nuevo Registro
+    </button>
+    <div class="user-chip">
+      <div class="user-avatar">AR</div>
+      <div class="user-info">
+        <span class="user-name">Admin</span>
+        <span class="user-role">Administrador</span>
       </div>
       <button mat-icon-button matTooltip="Cerrar sesión" (click)="logout()">
         <mat-icon>logout</mat-icon>
       </button>
     </div>
   </div>
-</header>
+</mat-toolbar>
