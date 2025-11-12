@@ -1,0 +1,29 @@
+.reports-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.search-field {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.full-width-table {
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.no-data {
+  text-align: center;
+  color: gray;
+  margin-top: 20px;
+}
+.loading {
+  text-align: center;
+  margin-top: 2rem;
+  font-style: italic;
+  color: #666;
+}

@@ -1,0 +1,53 @@
+<section class="dashboard-container">
+  <h2 class="dashboard-title">Bienvenido al Panel de Control</h2>
+
+  <!-- Primera sección: tarjetas de resumen -->
+  <div class="summary-section">
+    <mat-card class="summary-card blue">
+      <mat-icon>inventory_2</mat-icon>
+      <h3>Total de Productos</h3>
+      <p>{{ resumen.totalProductos || 0 }}</p>
+    </mat-card>
+
+    <mat-card class="summary-card orange">
+      <mat-icon>warning</mat-icon>
+      <h3>Stock Bajo</h3>
+      <p>{{ resumen.stockBajo || 0 }}</p>
+    </mat-card>
+
+    <mat-card class="summary-card green">
+      <mat-icon>trending_up</mat-icon>
+      <h3>Movimientos Hoy</h3>
+      <p>{{ resumen.movimientos || 0 }}</p>
+    </mat-card>
+
+    <mat-card class="summary-card red">
+      <mat-icon>notification_important</mat-icon>
+      <h3>Alertas Activas</h3>
+      <p>{{ resumen.alertasActivas || 0 }}</p>
+    </mat-card>
+  </div>
+
+  <!-- Segunda sección: gráficos -->
+  <section class="chart-section">
+    <mat-card class="chart-card">
+      <h3>Resumen de Movimientos</h3>
+      <canvas
+        baseChart
+        [data]="chartData"
+        [options]="chartOptions"
+        [type]="'bar'">
+      </canvas>
+    </mat-card>
+
+    <mat-card class="chart-card secondary">
+      <h3>Distribución del Inventario</h3>
+      <canvas
+        baseChart
+        [data]="pieData"
+        [options]="pieOptions"
+        [type]="'pie'">
+      </canvas>
+    </mat-card>
+  </section>
+</section>

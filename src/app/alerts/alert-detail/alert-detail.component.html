@@ -1,0 +1,6 @@
+<mat-card *ngIf="alerta">
+  <h2>{{ alerta.titulo }}</h2>
+  <p>{{ alerta.descripcion }}</p>
+  <p><strong>Fecha:</strong> {{ alerta.fecha | date:'short' }}</p>
+  <button mat-stroked-button color="primary" routerLink="/alerts">Volver</button>
+</mat-card>

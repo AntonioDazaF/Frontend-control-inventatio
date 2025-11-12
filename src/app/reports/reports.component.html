@@ -1,0 +1,21 @@
+<mat-card class="report-card">
+  <h2>Reportes del Sistema</h2>
+
+  <div class="chart-container">
+    <canvas id="movimientosChart"></canvas>
+  </div>
+
+  <div class="buttons">
+    <button mat-raised-button color="primary" (click)="descargarInventarioPDF()">
+      <mat-icon>picture_as_pdf</mat-icon> Inventario PDF
+    </button>
+
+    <button mat-raised-button color="accent" (click)="descargarMovimientosPDF()">
+      <mat-icon>assessment</mat-icon> Movimientos PDF
+    </button>
+
+    <button mat-raised-button color="warn" (click)="descargarInventarioExcel()">
+      <mat-icon>table_chart</mat-icon> Inventario Excel
+    </button>
+  </div>
+</mat-card>

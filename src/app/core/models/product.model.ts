@@ -4,7 +4,7 @@ export interface Product {
   categoria: string;
   sku: string;
   stock: number;
-  precio: number;
+  precioUnitario: number;
   descripcion?: string;
   fechaRegistro?: Date;
 }

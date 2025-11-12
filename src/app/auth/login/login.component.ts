@@ -9,7 +9,6 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 
 @Component({
@@ -23,9 +22,8 @@ import { MatSelectModule } from '@angular/material/select';
     MatButtonModule,
     MatCardModule,
     MatIconModule,
-    MatProgressSpinnerModule,
-    MatSnackBarModule,
-    MatSelectModule
+    MatSelectModule,
+    MatSnackBarModule
   ],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
@@ -35,6 +33,7 @@ export class LoginComponent implements OnInit {
   registerForm!: FormGroup;
   loading = false;
   isRegisterMode = false;
+  hidePassword = true;
 
   constructor(
     private fb: FormBuilder,
@@ -52,8 +51,7 @@ export class LoginComponent implements OnInit {
     this.registerForm = this.fb.group({
       nombreUsuario: ['', Validators.required],
       password: ['', [Validators.required, Validators.minLength(6)]],
-      confirmPassword: ['', Validators.required],
-      roles: ['OPERADOR', Validators.required] // valor por defecto
+      roles: ['', Validators.required]
     });
   }
 
@@ -61,58 +59,56 @@ export class LoginComponent implements OnInit {
     this.isRegisterMode = !this.isRegisterMode;
   }
 
+  togglePasswordVisibility(): void {
+    this.hidePassword = !this.hidePassword;
+  }
+
+  /** 🔹 Inicio de sesión */
   onSubmit(): void {
-    if (this.isRegisterMode) {
-      this.registerUser();
+    if (!this.isRegisterMode) {
+      this.login();
     } else {
-      this.loginUser();
+      this.registerUser();
     }
   }
 
-private loginUser(): void {
-  if (this.loginForm.invalid) {
-    this.snackBar.open('Completa todos los campos', 'Cerrar', { duration: 2500 });
-    return;
-  }
+  /** 🔹 Método login */
+  private login(): void {
+    if (this.loginForm.invalid) {
+      this.snackBar.open('Completa todos los campos', 'Cerrar', { duration: 2500 });
+      return;
+    }
 
-  this.loading = true;
-  const credentials = this.loginForm.value;
+    this.loading = true;
+    const credentials = this.loginForm.value;
 
-  this.authService.login(credentials).subscribe({
-    next: (response) => {
-      this.snackBar.open('Inicio de sesión exitoso', 'Cerrar', { duration: 2000 });
-
-      
-      if (response && response.token) {
-        this.authService.setToken(response.token);
+    this.authService.login(credentials).subscribe({
+      next: () => {
+        this.snackBar.open('Inicio de sesión exitoso', 'Cerrar', { duration: 2000 });
+        this.router.navigate(['/dashboard']);
+      },
+      error: () => {
+        this.snackBar.open('Credenciales incorrectas', 'Cerrar', { duration: 2500 });
+        this.loading = false;
       }
+    });
+  }
 
-      
-      this.loading = false;
-      this.router.navigate(['/dashboard']);
-    },
-    error: () => {
-      this.snackBar.open('Credenciales incorrectas', 'Cerrar', { duration: 2500 });
-      this.loading = false; 
-    }
-  });
-}
-
+  /** 🔹 Método registro */
   private registerUser(): void {
     if (this.registerForm.invalid) {
       this.snackBar.open('Por favor completa todos los campos correctamente', 'Cerrar', { duration: 2500 });
       return;
     }
 
-    const { password, confirmPassword } = this.registerForm.value;
-    if (password !== confirmPassword) {
-      this.snackBar.open('Las contraseñas no coinciden', 'Cerrar', { duration: 2500 });
-      return;
-    }
-
     this.loading = true;
+    const userData = {
+      nombreUsuario: this.registerForm.value.nombreUsuario, 
+      password: this.registerForm.value.password,
+      roles: [this.registerForm.value.roles] 
+    };
 
-    this.authService.register(this.registerForm.value).subscribe({
+    this.authService.register(userData).subscribe({
       next: () => {
         this.snackBar.open('Usuario registrado correctamente', 'Cerrar', { duration: 2000 });
         this.isRegisterMode = false;
@@ -124,4 +120,4 @@ private loginUser(): void {
       }
     });
   }
-  }
+}

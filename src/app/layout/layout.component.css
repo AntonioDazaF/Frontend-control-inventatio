@@ -1,0 +1,29 @@
+.layout-container {
+  height: 100vh;
+  display: flex;
+  background-color: #f5f6fa;
+}
+
+mat-sidenav {
+  width: 250px;
+  background: #fff;
+  border-right: 1px solid #e0e0e0;
+}
+
+mat-sidenav-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.layout-content {
+  padding: 24px;
+  overflow-y: auto;
+  background: #f9f9f9;
+  min-height: calc(100vh - 64px);
+}
+mat-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}

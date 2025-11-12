@@ -1,0 +1,5 @@
+<h2>Alertas del Sistema</h2>
+<div *ngFor="let alerta of alertas" class="alert-card" [class]="alerta.tipo">
+  <p><strong>{{ alerta.tipo.toUpperCase() }}</strong> — {{ alerta.mensaje }}</p>
+  <span>{{ alerta.fecha }}</span>
+</div>

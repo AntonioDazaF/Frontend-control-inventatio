@@ -1,0 +1,44 @@
+.movements-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.search-field {
+  width: 100%;
+  margin-bottom: 1.5rem;
+}
+
+.full-width-table {
+  width: 100%;
+}
+
+.tipo-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-weight: 600;
+}
+
+.tipo-entrada {
+  background-color: #e3f2fd;
+  color: #0d47a1;
+}
+
+.tipo-salida {
+  background-color: #ffebee;
+  color: #b71c1c;
+}
+
+.loading {
+  text-align: center;
+  margin-top: 2rem;
+  font-style: italic;
+  color: #666;
+}
+.no-movements {
+  text-align: center;
+  margin-top: 2rem;
+  font-style: italic;
+  color: #666;
+}

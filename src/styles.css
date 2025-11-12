@@ -2,3 +2,47 @@
 
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+/* === Snackbar personalizados === */
+.snack-success {
+  background-color: #43a047 !important;
+  color: #fff !important;
+  font-weight: 500;
+}
+
+.snack-error {
+  background-color: #e53935 !important;
+  color: #fff !important;
+  font-weight: 500;
+}
+
+.snack-warning {
+  background-color: #fbc02d !important;
+  color: #000 !important;
+  font-weight: 500;
+}
+
+.snack-info {
+  background-color: #1e88e5 !important;
+  color: #fff !important;
+  font-weight: 500;
+}
+
+.mat-mdc-snack-bar-container {
+  border-radius: 6px !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important;
+  animation: slideUp 0.3s ease forwards;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+

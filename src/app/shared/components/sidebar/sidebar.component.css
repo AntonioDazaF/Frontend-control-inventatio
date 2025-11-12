@@ -1,0 +1,18 @@
+.sidebar {
+  width: 220px;
+  background-color: #fff;
+  height: 100%;
+  border-right: 1px solid #e0e0e0;
+}
+
+a.mat-list-item.active {
+  background-color: rgba(25, 118, 210, 0.1);
+  color: #1976d2;
+}
+
+mat-icon {
+  margin-right: 10px;
+}
+a.mat-list-item {
+  color: rgba(0, 0, 0, 0.87);
+}

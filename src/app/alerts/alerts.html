@@ -1,1 +1,17 @@
-<p>alerts works!</p>
+<h2>Alertas de Inventario</h2>
+
+<div class="alert-container">
+  <mat-card *ngFor="let a of alertas" class="alert-card" [ngClass]="{
+      'alert-low': a.tipo === 'BAJO',
+      'alert-out': a.tipo === 'AGOTADO'
+    }">
+    <mat-card-title>{{ a.producto?.nombre }}</mat-card-title>
+    <mat-card-content>
+      <p><strong>Stock actual:</strong> {{ a.stock }}</p>
+      <p><strong>Tipo:</strong> {{ a.tipo }}</p>
+      <p><strong>Fecha:</strong> {{ a.fecha | date:'short' }}</p>
+    </mat-card-content>
+  </mat-card>
+</div>
+
+<div *ngIf="alertas.length === 0" class="loading">No hay alertas activas.</div>

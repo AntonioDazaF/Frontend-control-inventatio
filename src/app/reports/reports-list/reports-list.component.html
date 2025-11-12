@@ -1,0 +1,25 @@
+<mat-card class="report-card">
+  <h2>Reportes del Sistema</h2>
+  
+  <div *ngIf="errorMsg" class="error-message">
+    {{ errorMsg }}
+  </div>
+  
+  <div *ngIf="cargando" class="loading">
+    <mat-icon>hourglass_empty</mat-icon> Descargando…
+  </div>
+
+  <div class="buttons">
+    <button mat-raised-button color="primary" (click)="descargarInventarioPDF()">
+      <mat-icon>picture_as_pdf</mat-icon> Inventario (PDF)
+    </button>
+
+    <button mat-raised-button color="accent" (click)="descargarInventarioExcel()">
+      <mat-icon>table_view</mat-icon> Inventario (Excel)
+    </button>
+
+    <button mat-raised-button color="warn" (click)="descargarMovimientosPDF()">
+      <mat-icon>receipt_long</mat-icon> Movimientos (PDF)
+    </button>
+  </div>
+</mat-card>
