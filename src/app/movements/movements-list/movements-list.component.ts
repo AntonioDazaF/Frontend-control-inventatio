@@ -55,13 +55,13 @@ export class MovementListComponent implements OnInit {
   loadMovimientos(page: number = this.pageIndex, size: number = this.pageSize): void {
     this.api.getMovimientosPage(page, size).subscribe({
       next: (data) => {
-        const movimientos = Array.isArray(data) ? data : data.content || [];
+        const movimientos = Array.isArray(data) ? data : (data && data.content) || [];
         this.movimientosPagina = movimientos.map((m: any) => ({ ...m }));
 
         if (!Array.isArray(data)) {
-          this.totalMovimientos = data.totalElements ?? movimientos.length;
-          this.pageIndex = data.number ?? page;
-          this.pageSize = data.size ?? size;
+          this.totalMovimientos = typeof data.totalElements === 'number' ? data.totalElements : movimientos.length;
+          this.pageIndex = typeof data.number === 'number' ? data.number : page;
+          this.pageSize = typeof data.size === 'number' ? data.size : size;
         } else {
           this.totalMovimientos = movimientos.length;
           this.pageIndex = page;

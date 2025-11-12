@@ -157,9 +157,11 @@ export class ReportsComponent implements OnInit {
     return null;
   }
 
-  renderChart(): void {
-    const ctx = document.getElementById('movimientosChart') as HTMLCanvasElement;
-    if (!ctx) return;
+  private renderTendenciasChart(movimientos: any[]): void {
+    const canvas = document.getElementById('tendenciasChart') as HTMLCanvasElement;
+    if (!canvas) {
+      return;
+    }
 
     if (this.chart) {
       this.chart.destroy();

@@ -55,13 +55,13 @@ export class InventoryListComponent implements OnInit {
   loadProductos(page: number = this.currentPage, size: number = this.pageSize): void {
     this.api.getProductosPage(page, size).subscribe({
       next: (data) => {
-        const productos = Array.isArray(data) ? data : data?.content ?? [];
+        const productos = Array.isArray(data) ? data : (data && data.content) || [];
         this.productosPagina = productos.map((producto: any) => ({ ...producto }));
 
         if (!Array.isArray(data)) {
-          this.totalItems = data?.totalElements ?? productos.length;
-          this.currentPage = data?.number ?? page;
-          this.pageSize = data?.size ?? size;
+          this.totalItems = typeof data.totalElements === 'number' ? data.totalElements : productos.length;
+          this.currentPage = typeof data.number === 'number' ? data.number : page;
+          this.pageSize = typeof data.size === 'number' ? data.size : size;
         } else {
           this.totalItems = productos.length;
           this.currentPage = page;

@@ -12,7 +12,7 @@ export class AuthService {
     return this.http.post(`${this.baseUrl}/login`, credentials).pipe(
       tap((response: any) => {
         console.log('Respuesta de login:', response);
-        if (response?.token) {
+        if (response && response.token) {
           // Guarda el token JWT
           localStorage.setItem('token', response.token);
           // Guarda información del usuario si viene en la respuesta

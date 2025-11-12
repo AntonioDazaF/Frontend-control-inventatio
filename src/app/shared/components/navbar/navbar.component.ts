@@ -89,22 +89,22 @@ export class NavbarComponent implements OnInit {
 
   private loadUserData(): void {
     const storedUser = this.getStoredUser();
-    const normalizedRole = this.resolveRoleKey(
-      storedUser?.rol ?? storedUser?.role ?? storedUser?.perfil
-    );
+    const roleValue = storedUser
+      ? storedUser.rol || storedUser.role || storedUser.perfil
+      : undefined;
+    const normalizedRole = this.resolveRoleKey(roleValue);
     const config = this.roleConfigMap[normalizedRole];
 
-    const firstName =
-      storedUser?.nombre ??
-      storedUser?.firstName ??
-      storedUser?.name ??
-      storedUser?.username ??
-      storedUser?.nombreUsuario;
-    const lastName =
-      storedUser?.apellido ??
-      storedUser?.lastName ??
-      storedUser?.surname ??
-      '';
+    const firstName = storedUser
+      ? storedUser.nombre ||
+        storedUser.firstName ||
+        storedUser.name ||
+        storedUser.username ||
+        storedUser.nombreUsuario
+      : undefined;
+    const lastName = storedUser
+      ? storedUser.apellido || storedUser.lastName || storedUser.surname || ''
+      : '';
     const displayName = [firstName, lastName].filter(Boolean).join(' ').trim();
 
     this.userName = displayName ? this.formatDisplayName(displayName) : config.displayName;
