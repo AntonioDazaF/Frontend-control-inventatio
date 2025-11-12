@@ -1,14 +1,39 @@
-<mat-toolbar color="primary">
-  <button mat-icon-button (click)="toggleSidenav()" matTooltip="Menú">
-    <mat-icon>menu</mat-icon>
-  </button>
+<mat-toolbar class="navbar">
+  <div class="navbar-left">
+    <button mat-icon-button (click)="toggleSidenav()" matTooltip="Menú" class="menu-button">
+      <mat-icon>menu</mat-icon>
+    </button>
+    <div class="navbar-title">
+      <span class="title">Panel de Control</span>
+      <span class="subtitle">Bienvenido a InventarioPRO</span>
+    </div>
+  </div>
 
-  <span class="navbar-title">Control de Inventario</span>
+  <div class="navbar-center">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-icon matPrefix>search</mat-icon>
+      <input matInput placeholder="Buscar en el panel" />
+    </mat-form-field>
+  </div>
 
-  <span class="spacer"></span>
-
-  <button mat-icon-button matTooltip="Cerrar sesión" (click)="logout()">
-    <mat-icon>logout</mat-icon>
-  </button>
+  <div class="navbar-right">
+    <button mat-stroked-button color="primary" class="action-button">
+      <mat-icon>download</mat-icon>
+      Exportar
+    </button>
+    <button mat-flat-button color="primary" class="action-button">
+      <mat-icon>add</mat-icon>
+      Nuevo Registro
+    </button>
+    <div class="user-chip">
+      <div class="user-avatar">AR</div>
+      <div class="user-info">
+        <span class="user-name">Admin</span>
+        <span class="user-role">Administrador</span>
+      </div>
+      <button mat-icon-button matTooltip="Cerrar sesión" (click)="logout()">
+        <mat-icon>logout</mat-icon>
+      </button>
+    </div>
+  </div>
 </mat-toolbar>
-<!-- IGNORE -->
