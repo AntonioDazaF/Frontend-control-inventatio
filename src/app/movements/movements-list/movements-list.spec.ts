@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import { of } from 'rxjs';
+import { PageEvent } from '@angular/material/paginator';
 
 import { MovementListComponent } from './movements-list.component';
 import { ApiService } from '../../core/services/api.service';
@@ -14,6 +15,8 @@ describe('MovementListComponent', () => {
   let authService: jasmine.SpyObj<AuthService>;
 
   beforeEach(async () => {
+    apiService = jasmine.createSpyObj<ApiService>('ApiService', ['getMovimientosPage', 'getProductos']);
+    apiService.getMovimientosPage.and.returnValue(of({ content: [], totalElements: 0, number: 0, size: 10 }));
     apiService = jasmine.createSpyObj<ApiService>('ApiService', ['getMovimientos', 'getProductos']);
     apiService.getMovimientos.and.returnValue(of([]));
     apiService.getProductos.and.returnValue(of([]));
@@ -45,5 +48,13 @@ describe('MovementListComponent', () => {
     component.nuevoMovimiento();
 
     expect(navigateSpy).toHaveBeenCalledWith(['/movements/new']);
+  });
+
+  it('should request the selected page when cambiarPagina is invoked', () => {
+    const evento = { pageIndex: 1, pageSize: 25 } as PageEvent;
+
+    component.cambiarPagina(evento);
+
+    expect(apiService.getMovimientosPage).toHaveBeenCalledWith(1, 25);
   });
 });
