@@ -157,14 +157,14 @@ export class ReportsComponent implements OnInit {
   }
 
   descargarInventarioPDF(): void {
-    this.api.descargarArchivo('/api/reportes/inventario/pdf', 'inventario.pdf');
+    this.api.descargarArchivo('/reportes/inventario/pdf', 'inventario.pdf');
   }
 
   descargarMovimientosPDF(): void {
-    this.api.descargarArchivo('/api/reportes/movimientos/pdf', 'movimientos.pdf');
+    this.api.descargarArchivo('/reportes/movimientos/pdf', 'movimientos.pdf');
   }
 
   descargarInventarioExcel(): void {
-    this.api.descargarArchivo('/api/reportes/inventario/excel', 'inventario.xlsx');
+    this.api.descargarArchivo('/reportes/inventario/excel', 'inventario.xlsx', 'excel');
   }
 }
