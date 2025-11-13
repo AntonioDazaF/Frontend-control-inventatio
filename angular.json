@@ -11,13 +11,11 @@
       "architect": {  
         "build": {  
           "builder": "@angular-devkit/build-angular:application",  
-"options": {  
-  "outputPath": "dist/inventory-frontend",  
-  "index": "src/index.html",  
-  "browser": "src/main.ts",  
-  
-  "prerender": false,  
-  
+          "options": {  
+            "outputPath": "dist/inventory-frontend",  
+            "index": "src/index.html",  
+            "browser": "src/main.ts",  
+            "prerender": false,  
             "polyfills": ["zone.js"],  
             "tsConfig": "tsconfig.app.json",  
             "assets": [  
@@ -48,6 +46,25 @@
             }  
           },  
           "defaultConfiguration": "development"  
+        },  
+        "server": {  
+          "builder": "@angular-devkit/build-angular:server",  
+          "options": {  
+            "outputPath": "dist/inventory-frontend/server",  
+            "main": "src/server.ts",  
+            "tsConfig": "tsconfig.server.json"  
+          },  
+          "configurations": {  
+            "production": {  
+              "optimization": true,  
+              "sourceMap": false  
+            },  
+            "development": {  
+              "optimization": false,  
+              "sourceMap": true  
+            }  
+          },  
+          "defaultConfiguration": "production"  
         },  
         "serve": {  
           "builder": "@angular-devkit/build-angular:dev-server",  
