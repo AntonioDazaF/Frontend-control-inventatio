@@ -86,11 +86,6 @@ Conectar `WebSocketService` desde dashboard/listados para reaccionar a `/topic/p
 2. Ejecuta `npm run serve:ssr:inventory-frontend` para probar la build renderizada por Express (`src/server.ts`)
 3. Para producción, despliega los artefactos y levanta el servidor Node (puedes usar PM2; el archivo ya maneja `process.env.PORT`)
 
-## 📝 Próximos pasos sugeridos
-
-- [ ] Externalizar las URLs del backend mediante `environment.*.ts` o variables de entorno
-- [ ] Documentar colecciones de Postman/Swagger del backend y enlazarlas desde este README
-- [ ] Añadir un diagrama simple (PlantUML o Mermaid) que muestre el flujo Auth → Layout → Módulos para complementar la explicación textual
 
 ---
 
