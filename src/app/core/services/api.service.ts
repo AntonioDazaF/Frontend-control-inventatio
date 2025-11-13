@@ -12,7 +12,7 @@ import { Observable, of } from 'rxjs';
  */
 @Injectable({ providedIn: 'root' })
 export class ApiService {
-  private baseUrl = 'http://localhost:8080/api';
+  private baseUrl = 'https://backend-control-inventario-desplegar.onrender.com/api';
 
   constructor(private http: HttpClient) {}
 

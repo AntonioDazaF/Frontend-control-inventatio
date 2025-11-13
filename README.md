@@ -1,6 +1,6 @@
 # Frontend Control de Inventario
 
-Aplicación Angular (standalone components + Angular Material) para gestionar inventario, movimientos, usuarios y reportes de un almacén. Consume un backend REST/WS en `http://localhost:8080`, muestra tableros con charts, protege rutas con JWT y soporta descargas de reportes PDF/Excel.
+Aplicación Angular (standalone components + Angular Material) para gestionar inventario, movimientos, usuarios y reportes de un almacén. Consume un backend REST/WS en `https://backend-control-inventario-desplegar.onrender.com`, muestra tableros con charts, protege rutas con JWT y soporta descargas de reportes PDF/Excel.
 
 ## 🚀 Tecnologías principales
 
@@ -17,7 +17,7 @@ Aplicación Angular (standalone components + Angular Material) para gestionar in
 | Node.js     | ≥ 20.11 LTS      |
 | npm         | ≥ 10             |
 | Angular CLI | `npm install -g @angular/cli@20` |
-| Backend     | API/WS disponible en `http://localhost:8080` |
+| Backend     | API/WS disponible en `https://backend-control-inventario-desplegar.onrender.com` |
 
 ## ⚡ Puesta en marcha
 ```bash
@@ -29,7 +29,7 @@ npm run serve:ssr:inventory-frontend  # sirve build SSR en http://localhost:4000
 
 ## ⚙️ Configuración de entorno
 
-El `ApiService` y el `AuthService` tienen la URL base embebida (`http://localhost:8080/api`). Si necesitas otro host, crea un `environment.ts` o usa variables de entorno para sobreescribirla antes de construir.
+El `ApiService` y el `AuthService` tienen la URL base embebida (`https://backend-control-inventario-desplegar.onrender.com/api`). Si necesitas otro host, crea un `environment.ts` o usa variables de entorno para sobreescribirla antes de construir.
 
 El interceptor HTTP agrega automáticamente el token almacenado en `localStorage`. El guard `AuthGuard` rerutea a `/login` si el token falta o es corto.
 

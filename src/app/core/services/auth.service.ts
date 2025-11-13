@@ -7,7 +7,7 @@ import { Observable, tap } from 'rxjs';
  */
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private baseUrl = 'http://localhost:8080/api/auth';
+  private baseUrl = 'https://backend-control-inventario-desplegar.onrender.com/api/auth';
 
   constructor(private http: HttpClient) { }
 
