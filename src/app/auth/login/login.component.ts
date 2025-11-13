@@ -28,6 +28,9 @@ import { MatSelectModule } from '@angular/material/select';
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })
+/**
+ * Gestiona los formularios de autenticación y registro de usuarios.
+ */
 export class LoginComponent implements OnInit {
   loginForm!: FormGroup;
   registerForm!: FormGroup;
@@ -42,6 +45,7 @@ export class LoginComponent implements OnInit {
     private snackBar: MatSnackBar
   ) {}
 
+  /** @inheritDoc */
   ngOnInit(): void {
     this.loginForm = this.fb.group({
       nombreUsuario: ['', Validators.required],
@@ -55,15 +59,23 @@ export class LoginComponent implements OnInit {
     });
   }
 
+  /**
+   * Alterna entre los modos de inicio de sesión y registro.
+   */
   toggleMode(): void {
     this.isRegisterMode = !this.isRegisterMode;
   }
 
+  /**
+   * Cambia la visibilidad del campo de contraseña.
+   */
   togglePasswordVisibility(): void {
     this.hidePassword = !this.hidePassword;
   }
 
-  /** 🔹 Inicio de sesión */
+  /**
+   * Controla el envío del formulario según el modo seleccionado.
+   */
   onSubmit(): void {
     if (!this.isRegisterMode) {
       this.login();
@@ -72,7 +84,9 @@ export class LoginComponent implements OnInit {
     }
   }
 
-  /** 🔹 Método login */
+  /**
+   * Envía las credenciales para autenticar al usuario.
+   */
   private login(): void {
     if (this.loginForm.invalid) {
       this.snackBar.open('Completa todos los campos', 'Cerrar', { duration: 2500 });
@@ -94,7 +108,9 @@ export class LoginComponent implements OnInit {
     });
   }
 
-  /** 🔹 Método registro */
+  /**
+   * Envía los datos del formulario de registro para crear un nuevo usuario.
+   */
   private registerUser(): void {
     if (this.registerForm.invalid) {
       this.snackBar.open('Por favor completa todos los campos correctamente', 'Cerrar', { duration: 2500 });

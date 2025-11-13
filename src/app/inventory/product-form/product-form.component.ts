@@ -28,6 +28,10 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
   templateUrl: './product-form.component.html',
   styleUrls: ['./product-form.component.css']
 })
+/**
+ * Permite crear o editar productos del inventario, gestionando validaciones y
+ * notificaciones al usuario.
+ */
 export class ProductFormComponent implements OnInit {
   form!: FormGroup;
   isEdit = false;
@@ -42,6 +46,7 @@ export class ProductFormComponent implements OnInit {
     private snackBar: MatSnackBar
   ) {}
 
+  /** @inheritDoc */
   ngOnInit(): void {
     this.form = this.fb.group({
       id: [null],
@@ -62,7 +67,11 @@ export class ProductFormComponent implements OnInit {
     }
   }
 
-  /** 🔹 Cargar datos del producto al editar */
+  /**
+   * Carga en el formulario los datos de un producto existente.
+   *
+   * @param id Identificador del producto a consultar.
+   */
   loadProducto(id: string): void {
     this.api.getProducto(id).subscribe({
       next: (data) => {
@@ -81,7 +90,10 @@ export class ProductFormComponent implements OnInit {
     });
   }
 
-  /** 🔹 Convierte campos numéricos a número */
+  /**
+   * Convierte a numéricos los campos que lo requieren antes de enviar al
+   * backend.
+   */
   private ensureNumericValues(): void {
     ['precioUnitario', 'stock', 'minimo', 'stockMaximo'].forEach((key) => {
       const control = this.form.get(key);
@@ -91,30 +103,38 @@ export class ProductFormComponent implements OnInit {
     });
   }
 
-  /** 🔹 Verifica si un campo tiene un error específico */
-hasError(controlName: string, errorName: string): boolean {
-  const control = this.form.get(controlName);
-  return !!(control && control.hasError(errorName) && (control.dirty || control.touched));
-}
- 
-  /** 🔹 Guardar producto nuevo o actualizar existente */
-save(): void {
-  if (this.form.invalid) return;
+  /**
+   * Verifica si un control tiene un error específico para mostrar mensajes.
+   *
+   * @param controlName Nombre del control en el formulario.
+   * @param errorName Identificador del error a evaluar.
+   */
+  hasError(controlName: string, errorName: string): boolean {
+    const control = this.form.get(controlName);
+    return !!(control && control.hasError(errorName) && (control.dirty || control.touched));
+  }
 
-  this.loading = true;
-  const dto = {
-    ...this.form.value,
-    precioUnitario: Number(this.form.value.precioUnitario),
-    stock: Number(this.form.value.stock),
-    minimo: Number(this.form.value.minimo),
-    stockMaximo: Number(this.form.value.stockMaximo)
-  };
+  /**
+   * Envía el formulario creando o actualizando el producto en el backend.
+   */
+  save(): void {
+    if (this.form.invalid) return;
 
-  console.log('Datos enviados al backend:', dto); // 👈 Agrega esto
+    this.loading = true;
+    this.ensureNumericValues();
+    const dto = {
+      ...this.form.value,
+      precioUnitario: Number(this.form.value.precioUnitario),
+      stock: Number(this.form.value.stock),
+      minimo: Number(this.form.value.minimo),
+      stockMaximo: Number(this.form.value.stockMaximo)
+    };
 
-  const request = this.isEdit
-    ? this.api.updateProducto(this.form.value.id, dto)
-    : this.api.createProducto(dto);
+    console.log('Datos enviados al backend:', dto);
+
+    const request = this.isEdit
+      ? this.api.updateProducto(this.form.value.id, dto)
+      : this.api.createProducto(dto);
 
     request.subscribe({
       next: () => {
@@ -133,7 +153,9 @@ save(): void {
     });
   }
 
-  /** 🔹 Cancelar y volver al listado */
+  /**
+   * Cancela la edición y regresa al listado de inventario.
+   */
   cancel(): void {
     this.router.navigate(['/inventory']);
   }

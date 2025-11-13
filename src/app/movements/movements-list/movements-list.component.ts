@@ -28,6 +28,10 @@ import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
   templateUrl: './movement-list.component.html',
   styleUrls: ['./movement-list.component.css']
 })
+/**
+ * Lista los movimientos registrados en el inventario con paginación,
+ * filtrado por texto y navegación al formulario de creación.
+ */
 export class MovementListComponent implements OnInit {
   displayedColumns: string[] = ['id', 'producto', 'tipo', 'cantidad', 'fecha', 'usuario'];
   movimientos: any[] = [];
@@ -45,12 +49,20 @@ export class MovementListComponent implements OnInit {
     private authService: AuthService
   ) {}
 
+  /** @inheritDoc */
   ngOnInit(): void {
     // Obtener el usuario autenticado desde el token
     this.usuarioActual = this.authService.getUserFromToken();
     this.loadMovimientos();
   }
 
+  /**
+   * Solicita al backend la página de movimientos indicada y resuelve los
+   * datos auxiliares requeridos.
+   *
+   * @param page Número de página solicitado.
+   * @param size Cantidad de elementos por página.
+   */
   loadMovimientos(page: number = this.pageIndex, size: number = this.pageSize): void {
     this.api.getMovimientosPage(page, size).subscribe({
       next: (data) => {
@@ -74,6 +86,10 @@ export class MovementListComponent implements OnInit {
     });
   }
 
+  /**
+   * Vincula los datos de producto a cada movimiento cuando vienen como
+   * identificadores.
+   */
   private resolveProductos(): void {
     this.api.getProductos().subscribe({
       next: (productos) => {
@@ -89,10 +105,16 @@ export class MovementListComponent implements OnInit {
     });
   }
 
+  /**
+   * Aplica el filtro actual a la lista de movimientos.
+   */
   filtrar(): void {
     this.aplicarFiltro();
   }
 
+  /**
+   * Filtra internamente los resultados según el término de búsqueda.
+   */
   private aplicarFiltro(): void {
     const term = this.searchTerm.trim().toLowerCase();
     this.movimientos = term
@@ -100,12 +122,20 @@ export class MovementListComponent implements OnInit {
       : [...this.movimientosPagina];
   }
 
+  /**
+   * Controla el evento de cambio de página del paginador.
+   *
+   * @param evento Evento emitido por el paginador de Angular Material.
+   */
   cambiarPagina(evento: PageEvent): void {
     this.pageIndex = evento.pageIndex;
     this.pageSize = evento.pageSize;
     this.loadMovimientos(evento.pageIndex, evento.pageSize);
   }
 
+  /**
+   * Redirige al formulario para crear un nuevo movimiento.
+   */
   nuevoMovimiento(): void {
     this.router.navigate(['/movements/new']);
   }

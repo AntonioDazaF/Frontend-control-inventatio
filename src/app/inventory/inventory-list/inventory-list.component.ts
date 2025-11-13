@@ -27,6 +27,10 @@ import { ApiService } from '../../core/services/api.service';
   templateUrl: './inventory-list.component.html',
   styleUrls: ['./inventory-list.component.css']
 })
+/**
+ * Despliega el inventario disponible permitiendo búsqueda, paginación y
+ * acciones de edición o eliminación de productos.
+ */
 export class InventoryListComponent implements OnInit {
   displayedColumns: string[] = [
     'id',
@@ -48,10 +52,18 @@ export class InventoryListComponent implements OnInit {
 
   constructor(private api: ApiService, private router: Router) {}
 
+  /** @inheritDoc */
   ngOnInit(): void {
     this.loadProductos();
   }
 
+  /**
+   * Carga la página solicitada de productos desde el backend y aplica el
+   * filtro actual de búsqueda.
+   *
+   * @param page Número de página requerido.
+   * @param size Tamaño de página solicitado.
+   */
   loadProductos(page: number = this.currentPage, size: number = this.pageSize): void {
     this.api.getProductosPage(page, size).subscribe({
       next: (data) => {
@@ -74,12 +86,20 @@ export class InventoryListComponent implements OnInit {
     });
   }
 
+  /**
+   * Maneja los cambios de paginación provenientes del componente Material.
+   *
+   * @param event Información del cambio de página.
+   */
   onPageChange(event: PageEvent): void {
     this.pageSize = event.pageSize;
     this.currentPage = event.pageIndex;
     this.loadProductos(event.pageIndex, event.pageSize);
   }
 
+  /**
+   * Aplica el término de búsqueda sobre la página actual de resultados.
+   */
   applySearch(): void {
     const term = this.searchTerm.trim().toLowerCase();
     this.productos = term
@@ -91,10 +111,20 @@ export class InventoryListComponent implements OnInit {
       : [...this.productosPagina];
   }
 
+  /**
+   * Navega al formulario de edición del producto seleccionado.
+   *
+   * @param id Identificador del producto.
+   */
   editar(id: string): void {
     this.router.navigate(['/inventory/edit', id]);
   }
 
+  /**
+   * Elimina el producto indicado tras confirmar con el usuario.
+   *
+   * @param id Identificador del producto a eliminar.
+   */
   eliminar(id: string): void {
     if (confirm('¿Está seguro de eliminar este producto?')) {
       this.api.deleteProducto(id).subscribe({
@@ -104,6 +134,11 @@ export class InventoryListComponent implements OnInit {
     }
   }
 
+  /**
+   * Deriva el estado de inventario mostrado en la tabla.
+   *
+   * @param p Producto evaluado.
+   */
   getEstado(p: any): string {
     if (p.stock === 0) return 'Agotado';
     if (p.stock < p.minimo) return 'Bajo';
@@ -111,6 +146,11 @@ export class InventoryListComponent implements OnInit {
     return 'En Stock Máximo';
   }
 
+  /**
+   * Calcula la clase CSS asociada al estado del producto.
+   *
+   * @param p Producto evaluado.
+   */
   getEstadoClass(p: any): string {
     if (p.stock === 0) return 'estado-rojo';
     if (p.stock < p.minimo) return 'estado-naranja';

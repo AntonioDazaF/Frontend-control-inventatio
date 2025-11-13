@@ -4,6 +4,10 @@ import * as Stomp from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { Subject } from 'rxjs';
 
+/**
+ * Gestiona la conexión WebSocket (STOMP) utilizada para recibir actualizaciones
+ * en tiempo real de productos y alertas.
+ */
 @Injectable({ providedIn: 'root' })
 export class WebSocketService {
   private stompClient?: Client;
@@ -17,7 +21,10 @@ export class WebSocketService {
 
   constructor() {}
 
-  /** 🔹 Conectar al WebSocket backend */
+  /**
+   * Establece la conexión con el backend WebSocket si no existe una conexión
+   * activa.
+   */
   connect(): void {
     if (this.connected) return;
 
@@ -41,7 +48,9 @@ export class WebSocketService {
     this.stompClient.activate();
   }
 
-  /** 🔹 Escuchar productos */
+  /**
+   * Suscribe el cliente STOMP al tópico de productos y propaga los mensajes.
+   */
   private subscribeToProductTopic(): void {
     this.stompClient?.subscribe('/topic/productos', (message: IMessage) => {
       if (message.body) {
@@ -51,7 +60,9 @@ export class WebSocketService {
     });
   }
 
-  /** 🔹 Escuchar alertas */
+  /**
+   * Suscribe el cliente STOMP al tópico de alertas y propaga los mensajes.
+   */
   private subscribeToAlertsTopic(): void {
     this.stompClient?.subscribe('/topic/alertas', (message: IMessage) => {
       if (message.body) {
@@ -61,12 +72,19 @@ export class WebSocketService {
     });
   }
 
-  /** 🔹 Permitir suscripción directa desde componentes */
+  /**
+   * Permite a los componentes subscribirse a la secuencia de alertas sin
+   * exponer la implementación interna.
+   *
+   * @param callback Función a ejecutar por cada alerta recibida.
+   */
   subscribeToAlerts(callback: (alert: any) => void): void {
     this.alerts$.subscribe(callback);
   }
 
-  /** 🔹 Desconectar */
+  /**
+   * Cierra la conexión con el WebSocket si se encuentra activa.
+   */
   disconnect(): void {
     if (this.stompClient && this.connected) {
       this.stompClient.deactivate();
