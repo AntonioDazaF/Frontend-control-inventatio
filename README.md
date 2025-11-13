@@ -1,63 +1,94 @@
-Frontend – Control de Inventario
+# 🚀 Frontend – Control de Inventario
 
-Aplicación desarrollada en Angular con componentes standalone y Angular Material para gestionar inventario, movimientos, usuarios y reportes. Consume un backend REST/WebSocket en http://localhost:8080, ofrece tableros visuales con gráficos, protege rutas mediante JWT y permite descargas de reportes en PDF y Excel.
+Aplicación desarrollada en **Angular 20** (con *standalone components* + **Angular Material**) para gestionar **inventario, movimientos, usuarios, reportes** y monitoreo en tiempo real.  
+Consume un backend **REST + WebSockets** en `http://localhost:8080`, protege rutas con **JWT**, muestra dashboards con gráficos y permite descargar reportes **PDF/Excel**.
 
-Tecnologías principales
+---
 
-Angular 20 + Angular Material + CDK
+## 🧩 Tecnologías principales
 
-Enrutamiento standalone (provideRouter) y Renderizado Híbrido con @angular/ssr
+- **Angular 20**, Angular Material y CDK  
+- **Standalone routing** (`provideRouter`) + `@angular/ssr`  
+- **RxJS**, `ng2-charts` y Chart.js  
+- **STOMP** con `@stomp/stompjs` + `sockjs-client` para tiempo real  
+- **Node + Express** (via `server.ts`) para SSR
 
-RxJS y Chart.js / ng2-charts para visualización de datos
+---
 
-STOMP + SockJS para actualizaciones en tiempo real
+## 📦 Requisitos
 
-Express (via server.ts) para servir la versión SSR en Node.js
+| Herramienta | Versión sugerida |
+|-------------|------------------|
+| Node.js     | ≥ 20.11 LTS      |
+| npm         | ≥ 10             |
+| Angular CLI | `npm install -g @angular/cli@20` |
+| Backend     | API/WS en `http://localhost:8080` |
 
-Requisitos
-Herramienta	Versión recomendada
-Node.js	≥ 20.11 LTS
-npm	≥ 10
-Angular CLI	@angular/cli@20
-Backend	API/WS disponible en http://localhost:8080
-Puesta en marcha
+---
+
+## ▶️ Puesta en marcha
+
+
 npm install
-npm start                     # ng serve → http://localhost:4200
-npm run build                 # genera dist/browser y dist/server
-npm run serve:ssr:inventory-frontend   # SSR → http://localhost:4000
+npm start                           # Servidor de desarrollo en http://localhost:4200
+npm run build                       # Genera dist/browser y dist/server
+npm run serve:ssr:inventory-frontend # SSR en http://localhost:4000
 
-Configuración de entorno
 
-ApiService y AuthService usan como base http://localhost:8080/api.
+⚙️ Configuración de entorno
 
-Para cambiar el host, crea un environment.ts o usa variables de entorno antes de construir.
+ApiService y AuthService usan la URL base http://localhost:8080/api.
+Si necesitas otro host, configura environment.ts o variables de entorno antes de compilar.
 
-El interceptor HTTP agrega automáticamente el token desde localStorage.
+El interceptor HTTP agrega automáticamente el token guardado en localStorage.
 
-AuthGuard redirige a /login si el token no existe o es inválido.
+El AuthGuard redirige a /login si no existe JWT o está expirado.
 
-Arquitectura funcional
-Módulo	Responsabilidad
-auth/login	Formulario dual (login/registro) con validaciones, feedback y alternancia de vista. Maneja token y usuario mediante AuthService.
-layout + shared/components/navbar + sidebar	Layout principal y navegación de la aplicación protegida.
-dashboard	Resumen visual del inventario (tarjetas + gráficos). Consume ApiService.getDashboardResumen().
-inventory	Listado paginado, búsqueda local y formulario reactivo para crear/editar productos. Usa CRUD de ApiService.
-movements	Tabla paginada de movimientos, filtros, obtención del usuario desde JWT y formulario para entradas/salidas.
-reports	Descarga de reportes PDF/Excel y gráfico que compila todos los movimientos antes de generar el resumen.
-core	Servicios globales (ApiService, AuthService, WebSocketService), guards e interceptor central de autenticación.
-alerts (placeholder)	Espacio para futuras alertas en tiempo real mediante WebSocketService.
-Servicios clave
+🏗️ Arquitectura funcional
+auth / login
+
+Formulario con modo login/registro, validaciones, feedback visual y consumo de AuthService.
+
+layout + shared/components (navbar, sidebar)
+
+Estructura principal para navegación y protección de rutas.
+
+dashboard
+
+Tarjetas + gráficos (bar/pie) consumiendo ApiService.getDashboardResumen() y datos de inventario.
+
+inventory
+
+Listado con paginación, búsqueda local y formulario (alta/edición) vía Reactive Forms.
+
+movements
+
+Tabla paginada de movimientos, filtros por producto y formulario para entradas/salidas.
+
+reports
+
+Descarga de reportes PDF/Excel y gráfico que resume toda la paginación de movimientos.
+
+core
+
+Servicios globales (ApiService, AuthService, WebSocketService), guards e interceptor JWT.
+
+alerts (placeholder)
+
+Preparado para alertas en tiempo real utilizando WebSockets.
+
+🧠 Servicios clave
 AuthService
 
-Login y registro
+Login/registro
 
-Persistencia y lectura del token JWT (localStorage)
+Persistencia y lectura del token (localStorage)
 
-getUserFromToken() para obtener datos del usuario en UI
+getUserFromToken() para mostrar datos en la UI
 
 ApiService
 
-Capa unificada para Productos, Movimientos, Dashboard, Reportes y Alertas
+CRUD de productos, movimientos, dashboard y reportes
 
 Helpers para paginación
 
@@ -65,45 +96,52 @@ Descarga de archivos PDF/Excel
 
 WebSocketService
 
-Conexión a /ws mediante SockJS/STOMP
+Conexión a /ws vía SockJS/STOMP
 
-Expone productUpdates$ y alerts$ como observables para eventos en tiempo real
+Expone productUpdates$ y alerts$ para recibir eventos en vivo
 
-Flujos destacados
-Autenticación
+🔄 Flujos importantes
+🔐 Autenticación
 
-LoginComponent → AuthService.login() → guardado del token → AuthGuard permite acceso al layout → interceptor adjunta el token en cada petición.
+LoginComponent → AuthService.login() → guarda token → AuthGuard habilita acceso → interceptor añade Authorization a cada request.
 
-Inventario
+📦 Inventario
 
-InventoryListComponent consulta /productos/page, permite búsqueda, abre formulario en /inventory/new o /inventory/edit/:id, y ejecuta CRUD mediante ApiService.
+InventoryListComponent → /productos/page → búsqueda local → rutas /inventory/new o /inventory/edit/:id → CRUD vía ApiService.
 
-Movimientos y Reportes
+🔁 Movimientos y Reportes
 
-El listado usa getMovimientosPage, resuelve nombres de productos y navega a un formulario para registrar entradas/salidas.
-ReportsComponent agrega todas las páginas de movimientos antes de graficar y permite descargas directas de reportes.
+getMovimientosPage con paginación
 
-Alertas en tiempo real (opcional)
+Resolución de nombres de productos
 
-Cualquier componente puede suscribirse a /topic/productos y /topic/alertas usando WebSocketService.
+Formulario para entradas/salidas
 
-Pruebas y calidad
+ReportsComponent pagina todos los movimientos antes de graficar
 
-Unit tests: npm test (Karma + Jasmine)
+⚡ Alertas en tiempo real
 
-Prettier configurado en package.json
+Suscripción a /topic/productos y /topic/alertas (observables listos para usar).
 
-Linter de Angular (ng lint, si está habilitado)
+🧪 Pruebas y calidad
 
-Recomendación: agregar pruebas para InventoryListComponent y MovementFormComponent con mocks del ApiService
+Unit tests:
 
-SSR y despliegue
+npm test
 
-npm run build genera dist/browser y dist/server
 
-npm run serve:ssr:inventory-frontend levanta la build SSR desde server.ts
+(Karma + Jasmine. Cobertura para guards, interceptor, servicios y componentes base)
 
-Para producción: desplegar artefactos y ejecutar servidor Node (ej. con PM2)
+Estilo:
+Prettier (configurado en package.json) y linter de Angular.
 
-server.ts ya respeta process.env.PORT
+Recomendación:
+Añadir pruebas para InventoryListComponent y MovementFormComponent.
 
+🌐 SSR & Despliegue
+
+npm run build genera dist/browser + dist/server.
+
+npm run serve:ssr:inventory-frontend inicia la app renderizada con Express.
+
+Para producción: levantar el servidor Node (ideal con PM2) usando process.env.PORT.
