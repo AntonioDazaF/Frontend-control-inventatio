@@ -49,6 +49,10 @@ type InventoryDistribution = {
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })
+/**
+ * Renderiza la vista principal con métricas resumidas y gráficas del estado
+ * del inventario.
+ */
 export class DashboardComponent implements OnInit {
   resumen: Partial<DashboardResumen> = {};
   private readonly movimientosPageSize = 100;
@@ -85,6 +89,7 @@ export class DashboardComponent implements OnInit {
 
   constructor(private api: ApiService) {}
 
+  /** @inheritDoc */
   ngOnInit(): void {
     forkJoin({
       resumen: this.api.getDashboardResumen().pipe(
@@ -165,6 +170,11 @@ export class DashboardComponent implements OnInit {
     });
   }
 
+  /**
+   * Calcula la distribución de inventario según la disponibilidad de stock.
+   *
+   * @param productos Colección de productos del inventario.
+   */
   private calcularDistribucion(productos: any[]): InventoryDistribution {
     return productos.reduce<InventoryDistribution>((acumulado, producto) => {
       const stock = this.toNumber(producto?.stock);
@@ -185,6 +195,12 @@ export class DashboardComponent implements OnInit {
     }, { disponibles: 0, stockBajo: 0, agotados: 0 });
   }
 
+  /**
+   * Convierte un valor arbitrario a número garantizando un valor por defecto.
+   *
+   * @param valor Entrada a convertir.
+   * @param defecto Valor retornado cuando la conversión no es válida.
+   */
   private toNumber(valor: unknown, defecto = 0): number {
     const numero = Number(valor);
     return Number.isFinite(numero) ? numero : defecto;

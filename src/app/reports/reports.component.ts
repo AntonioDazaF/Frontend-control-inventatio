@@ -15,6 +15,10 @@ Chart.register(BarController, BarElement, CategoryScale, LinearScale, Title, Too
   templateUrl: './reports.component.html',
   styleUrls: ['./reports.component.css']
 })
+/**
+ * Construye la vista de reportes, generando gráficas a partir de los
+ * movimientos y ofreciendo descargas en distintos formatos.
+ */
 export class ReportsComponent implements OnInit {
   movimientosData: any[] = [];
   private chart?: Chart;
@@ -23,10 +27,14 @@ export class ReportsComponent implements OnInit {
 
   constructor(private api: ApiService) {}
 
+  /** @inheritDoc */
   ngOnInit(): void {
     this.cargarResumen();
   }
 
+  /**
+   * Resetea el estado actual y comienza la carga paginada de movimientos.
+   */
   cargarResumen(): void {
     this.movimientosData = [];
     this.movimientoIds.clear();
@@ -38,6 +46,12 @@ export class ReportsComponent implements OnInit {
     this.cargarPaginaMovimientos();
   }
 
+  /**
+   * Recupera de forma recursiva cada página de movimientos hasta completar la
+   * información necesaria para graficar.
+   *
+   * @param page Número de página que se solicitará al backend.
+   */
   private cargarPaginaMovimientos(page: number = 0): void {
     this.api.getMovimientos(page, this.pageSize).subscribe({
       next: (data: any) => {
@@ -93,6 +107,12 @@ export class ReportsComponent implements OnInit {
     });
   }
 
+  /**
+   * Obtiene una referencia única para cada movimiento y evitar duplicados al
+   * combinar páginas.
+   *
+   * @param movimiento Movimiento recibido del backend.
+   */
   private obtenerIdentificadorMovimiento(movimiento: any): string | null {
     if (movimiento == null || typeof movimiento !== 'object') {
       return null;
@@ -113,6 +133,9 @@ export class ReportsComponent implements OnInit {
     return null;
   }
 
+  /**
+   * Construye o actualiza la gráfica de barras con los totales de movimientos.
+   */
   renderChart(): void {
     const ctx = document.getElementById('movimientosChart') as HTMLCanvasElement;
     if (!ctx) return;
@@ -156,14 +179,23 @@ export class ReportsComponent implements OnInit {
     });
   }
 
+  /**
+   * Descarga el reporte de inventario en formato PDF.
+   */
   descargarInventarioPDF(): void {
     this.api.descargarArchivo('/reportes/inventario/pdf', 'inventario.pdf');
   }
 
+  /**
+   * Descarga el reporte de movimientos en formato PDF.
+   */
   descargarMovimientosPDF(): void {
     this.api.descargarArchivo('/reportes/movimientos/pdf', 'movimientos.pdf');
   }
 
+  /**
+   * Descarga el reporte de inventario en formato Excel.
+   */
   descargarInventarioExcel(): void {
     this.api.descargarArchivo('/reportes/inventario/excel', 'inventario.xlsx', 'excel');
   }

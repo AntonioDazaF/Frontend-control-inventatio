@@ -28,6 +28,10 @@ import { ApiService } from '../../core/services/api.service';
   templateUrl: './movement-form.component.html',
   styleUrls: ['./movement-form.component.css']
 })
+/**
+ * Formulario para registrar nuevos movimientos de inventario y validar la
+ * información requerida por el backend.
+ */
 export class MovementFormComponent implements OnInit {
   form!: FormGroup;
   productos: any[] = [];
@@ -37,9 +41,10 @@ export class MovementFormComponent implements OnInit {
     private fb: FormBuilder,
     private api: ApiService,
     private router: Router,
-    private snackBar: MatSnackBar // ✅ asegurarse que sea MatSnackBar
+    private snackBar: MatSnackBar
   ) {}
 
+  /** @inheritDoc */
   ngOnInit(): void {
     this.form = this.fb.group({
       tipo: ['', Validators.required],
@@ -51,6 +56,10 @@ export class MovementFormComponent implements OnInit {
     this.loadProductos();
   }
 
+  /**
+   * Recupera el catálogo de productos para alimentar las opciones del
+   * selector.
+   */
   loadProductos(): void {
     this.api.getProductos().subscribe({
       next: (data) => (this.productos = Array.isArray(data) ? data : data.content || []),
@@ -58,6 +67,9 @@ export class MovementFormComponent implements OnInit {
     });
   }
 
+  /**
+   * Envía el formulario para crear un nuevo movimiento.
+   */
   save(): void {
     if (this.form.invalid) return;
 
@@ -75,6 +87,9 @@ export class MovementFormComponent implements OnInit {
     });
   }
 
+  /**
+   * Cancela la operación y regresa al listado de movimientos.
+   */
   cancel(): void {
     this.router.navigate(['/movements']);
   }
