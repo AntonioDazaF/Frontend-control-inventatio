@@ -52,10 +52,10 @@ app.use((req, res, next) => {
  * The server listens on the port defined by the `PORT` environment variable, or defaults to 4000.
  */
 if (isMainModule(import.meta.url) || process.env['pm_id']) {  
-  const port = Number(process.env['PORT']) || 4000;  // Convertir a número  
-  const host = '0.0.0.0';  
+  const port = Number(process.env['PORT']) || 4000;  
+  const host = '0.0.0.0';  // ← Esta línea es crítica  
     
-  app.listen(port, host, (error) => {  
+  app.listen(port, host, (error) => {  // ← Debe incluir 'host'  
     if (error) {  
       throw error;  
     }  
