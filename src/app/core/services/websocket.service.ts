@@ -29,7 +29,7 @@ export class WebSocketService {
     if (this.connected) return;
 
     // URL del backend WebSocket en producción
-    const socket = new SockJS('wss://backend-control-inventario-desplegar.onrender.com/ws');
+    const socket = new SockJS('https://backend-control-inventario-desplegar.onrender.com/ws');
     this.stompClient = Stomp.Stomp.over(socket); // <-- Usa Stomp.Stomp.over()
 
     this.stompClient.onConnect = () => {
